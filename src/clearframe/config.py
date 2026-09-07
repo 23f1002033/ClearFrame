@@ -55,20 +55,52 @@ class Settings(BaseSettings):
     google_api_key: Optional[str] = Field(
         default=None, description="Gemini API key, used when not on Vertex AI."
     )
+    gemini_api_key: Optional[str] = Field(
+        default=None,
+        description=(
+            "Alias for google_api_key. The google-genai SDK accepts either "
+            "GOOGLE_API_KEY or GEMINI_API_KEY, so ClearFrame reads both and "
+            "prefers GOOGLE_API_KEY when both are set."
+        ),
+    )
 
+    gemini_parse_model: str = Field(
+        default="gemini-flash-latest",
+        description=(
+            "Model for screenplay scene segmentation. Flash is safe here: scene "
+            "boundaries and page numbers matched Pro exactly across every measured "
+            "run, and the deterministic slugline anchor in ingest/parser.py "
+            "overrides any page number the model gets wrong."
+        ),
+    )
     gemini_extraction_model: str = Field(
-        default="gemini-2.5-pro",
-        description="Model for screenplay parsing and item extraction.",
+        default="gemini-3.1-pro-preview",
+        description=(
+            "Model for clearable-item extraction. Kept on Pro deliberately: on "
+            "Flash, item recall and depiction_nature varied run to run at "
+            "temperature 0, and a dropped item is never recovered by a later "
+            "stage, whereas a wrong tier is at least surfaced to a reviewer."
+        ),
     )
     gemini_synthesis_model: str = Field(
-        default="gemini-2.5-pro",
-        description="Model for finding synthesis in the assembler.",
+        default="gemini-3.1-pro-preview",
+        description=(
+            "Model for finding synthesis in the assembler. Kept on Pro: tiering and "
+            "cited rationale are the judgment-heavy step and run once per item."
+        ),
     )
     gemini_orchestrator_model: str = Field(
-        default="gemini-2.5-pro", description="Model backing the ADK root agent."
+        default="gemini-3.1-pro-preview",
+        description="Model backing the ADK root agent.",
     )
     gemini_timeout_seconds: float = Field(default=180.0, gt=0)
     gemini_max_retries: int = Field(default=3, ge=0)
+    gemini_max_concurrency: int = Field(
+        default=6,
+        ge=1,
+        le=32,
+        description="Hard cap on simultaneous Gemini calls during chunk extraction.",
+    )
 
     # -- Parallel -------------------------------------------------------------
     parallel_api_key: Optional[str] = Field(
@@ -139,10 +171,50 @@ class Settings(BaseSettings):
     # -- Derived --------------------------------------------------------------
     @property
     def gemini_configured(self) -> bool:
-        """Return True if Gemini can be called with the current configuration."""
+        """Return True if Gemini can be called with the current configuration.
+
+        On the Vertex AI path a real project id is required and the API key is
+        ignored, so a placeholder project must not read as configured.
+        """
         if self.google_genai_use_vertexai:
-            return bool(self.google_cloud_project)
+            return bool(self.google_cloud_project) and not _is_placeholder(
+                self.google_cloud_project
+            )
         return bool(resolve_google_api_key(self))
+
+    def configuration_warnings(self) -> list[str]:
+        """Return actionable warnings about a contradictory configuration.
+
+        Surfaced by ``/api/health`` so a misconfigured deployment is visible
+        rather than failing on the first Gemini call.
+        """
+        warnings: list[str] = []
+        has_key = bool(resolve_google_api_key(self))
+        project_ok = bool(self.google_cloud_project) and not _is_placeholder(
+            self.google_cloud_project
+        )
+
+        if self.google_genai_use_vertexai:
+            if not project_ok:
+                warnings.append(
+                    "GOOGLE_GENAI_USE_VERTEXAI=true but GOOGLE_CLOUD_PROJECT is unset or "
+                    "a placeholder. Set a real project id, or set "
+                    "GOOGLE_GENAI_USE_VERTEXAI=false to use an AI Studio API key."
+                )
+            if has_key and not project_ok:
+                warnings.append(
+                    "An API key is present but GOOGLE_GENAI_USE_VERTEXAI=true causes the "
+                    "google-genai client to ignore it and use Application Default "
+                    "Credentials instead."
+                )
+        elif not has_key:
+            warnings.append(
+                "No Gemini API key found. Set GOOGLE_API_KEY or GEMINI_API_KEY."
+            )
+
+        if not resolve_parallel_api_key(self):
+            warnings.append("No Parallel API key found. Set PARALLEL_API_KEY.")
+        return warnings
 
     @property
     def parallel_configured(self) -> bool:
@@ -160,6 +232,21 @@ GEMINI_SAFETY_RATIONALE = (
     "trail as a SAFETY_BLOCKED entry naming the scene range, so the omission is "
     "visible to the reviewer instead of disappearing."
 )
+
+
+_PLACEHOLDER_VALUES = {"", "...", "your-project-id", "changeme", "todo", "none", "null"}
+
+
+def _is_placeholder(value: Optional[str]) -> bool:
+    """Return True if a config value is an unfilled placeholder rather than real.
+
+    Args:
+        value: The configured value.
+
+    Returns:
+        True if the value is empty or a recognised placeholder token.
+    """
+    return value is None or value.strip().lower() in _PLACEHOLDER_VALUES
 
 
 def _secret_manager_get(project_id: str, secret_id: str, version: str) -> Optional[str]:
@@ -226,7 +313,12 @@ def resolve_google_api_key(settings: "Settings") -> Optional[str]:
         )
         if secret:
             return secret
-    return settings.google_api_key or os.getenv("GOOGLE_API_KEY")
+    return (
+        settings.google_api_key
+        or settings.gemini_api_key
+        or os.getenv("GOOGLE_API_KEY")
+        or os.getenv("GEMINI_API_KEY")
+    )
 
 
 def build_safety_settings(settings: Optional["Settings"] = None) -> list:
