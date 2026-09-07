@@ -29,7 +29,7 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 from clearframe.audit.logger import AuditLogger
-from clearframe.config import Settings, get_settings
+from clearframe.config import Settings, get_settings, preflight
 from clearframe.models import (
     Evidence,
     ExtractedItem,
@@ -513,6 +513,28 @@ async def research_items(
     settings = settings or get_settings()
     if not items:
         return {}
+
+    # Report credential state before opening the fan-out. A missing or shadowed
+    # key surfaced here names the problem once, at the top of the stage, instead
+    # of appearing as N concurrent authentication errors attributed to the
+    # research logic.
+    key_reports = preflight(settings, stage="RESEARCH")
+    if audit:
+        parallel_key = next(r for r in key_reports if r["name"] == "PARALLEL_API_KEY")
+        audit.record(
+            stage=PipelineStage.RESEARCH,
+            tool="config.preflight",
+            input_summary=f"{len(items)} items queued for research",
+            output_summary=(
+                f"PARALLEL_API_KEY resolved (length={parallel_key['length']}, "
+                f"source={parallel_key['source']})"
+                if parallel_key["present"]
+                else f"PARALLEL_API_KEY NOT RESOLVED (source={parallel_key['source']}) - "
+                f"every research call will fail authentication"
+            ),
+            level="INFO" if parallel_key["present"] else "ERROR",
+            **{k: v for k, v in parallel_key.items() if k != "prefix"},
+        )
 
     owns_client = client is None
     client = client or ParallelClient(settings)

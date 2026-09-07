@@ -463,7 +463,28 @@ async def run_pipeline(
         )
 
         report.status = ReportStatus.DRAFT
-        report.pipeline_state = "COMPLETE"
+
+        # A script that parsed into scenes but yielded no items did not succeed.
+        # Reporting COMPLETE with zero items reads to a producer as "nothing in
+        # this script needs clearing", which is the most dangerous possible
+        # false negative for this product.
+        if report.scene_count > 0 and not report.items:
+            report.pipeline_state = "FAILED"
+            report.error = (
+                f"Extraction produced no items from {report.scene_count} parsed scenes. "
+                f"This is a pipeline failure, not a clean script. Check the trace for "
+                f"failed or safety-blocked extraction chunks before relying on this report."
+            )
+            audit.record(
+                stage=PipelineStage.ORCHESTRATOR,
+                tool="run_pipeline",
+                input_summary=f"{report.scene_count} scenes parsed",
+                output_summary=report.error,
+                level="ERROR",
+                zero_items=True,
+            )
+        else:
+            report.pipeline_state = "COMPLETE"
     except Exception as exc:  # noqa: BLE001 - surfaced on the report, not swallowed
         logger.exception("pipeline failed for %s", script_path)
         report.pipeline_state = "FAILED"

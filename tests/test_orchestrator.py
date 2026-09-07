@@ -163,3 +163,46 @@ def test_orchestrator_instruction_forbids_self_calculated_terms() -> None:
     assert "Never assign a tier yourself" in instruction
     assert "Never state a copyright term you calculated yourself" in instruction
     assert "NEVER state that anything is cleared" in instruction
+
+
+async def test_zero_items_from_a_parsed_script_is_a_failure_not_a_clean_report() -> None:
+    """A report claiming no items after parsing scenes is a false negative.
+
+    When every extraction chunk failed, the run previously reported COMPLETE with
+    zero items, which a producer reads as "nothing in this script needs
+    clearing" - the most dangerous outcome this product can produce.
+    """
+    from pathlib import Path
+
+    from clearframe.agents import orchestrator as orch
+    from clearframe.config import Settings
+    from clearframe.ingest.parser import parse_script
+
+    settings = Settings(parallel_api_key="k")
+
+    async def no_items(scenes, settings=None, audit=None):
+        return []
+
+    async def no_evidence(items, settings=None, audit=None, client=None):
+        return {}
+
+    async def no_findings(items, store, settings=None, audit=None):
+        return []
+
+    orig = (orch.extract_items_async, orch.research_items, orch.assemble_findings)
+    orch.extract_items_async, orch.research_items, orch.assemble_findings = (
+        no_items,
+        no_evidence,
+        no_findings,
+    )
+    try:
+        report = await orch.run_pipeline(
+            Path("data/scripts/the_last_good_year.pdf"), settings=settings
+        )
+    finally:
+        orch.extract_items_async, orch.research_items, orch.assemble_findings = orig
+
+    assert report.scene_count > 0
+    assert report.items == []
+    assert report.pipeline_state == "FAILED"
+    assert "pipeline failure, not a clean script" in report.error

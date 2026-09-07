@@ -356,3 +356,36 @@ def test_pipeline_state_advances_to_running_while_work_is_in_flight(
     )
     assert response.status_code == 202
     assert seen == ["RUNNING"]
+
+
+def test_env_example_documents_every_setting() -> None:
+    """A setting that exists but is undocumented is a setting nobody configures.
+
+    Regression guard: GEMINI_MAX_RETRIES shipped declared-but-unused and
+    undocumented, and Gemini calls silently had no retry policy as a result.
+    """
+    import re
+    from pathlib import Path
+
+    from clearframe.config import Settings
+
+    example = Path("/Users/utkarshgupta/Documents/ClearFrame/.env.example")
+    if not example.exists():  # pragma: no cover - repo layout guard
+        pytest.skip(".env.example not found")
+    documented = set(
+        re.findall(r"^#?\s*([A-Z_][A-Z0-9_]*)=", example.read_text(), re.M)
+    )
+    missing = sorted(n.upper() for n in Settings.model_fields if n.upper() not in documented)
+    assert not missing, f"undocumented settings: {missing}"
+
+
+def test_env_example_contains_no_real_secret_values() -> None:
+    """The committed template must never carry a live key."""
+    from pathlib import Path
+
+    example = Path("/Users/utkarshgupta/Documents/ClearFrame/.env.example")
+    if not example.exists():  # pragma: no cover
+        pytest.skip(".env.example not found")
+    for line in example.read_text().splitlines():
+        if line.startswith(("GOOGLE_API_KEY=", "GEMINI_API_KEY=", "PARALLEL_API_KEY=")):
+            assert line.split("=", 1)[1].strip() == "", f"secret value present: {line[:24]}"

@@ -1,0 +1,743 @@
+{
+  "schema_version": "1.0",
+  "script": "data/scripts/the_last_good_year.pdf",
+  "script_revision": "v2 (adds INT. MERIDIAN SOUND - LOBBY - DAY for LOGO_PROP coverage)",
+  "pipeline_run": {
+    "report_id": "rpt_2640c7940863",
+    "note": "Entries 1-15 are scored against the last complete run, on script v1 (14 scenes / 6 pages). LOGO_PROP entries are ground truth only; the v2 run is blocked on the Gemini monthly spend cap."
+  },
+  "verification_method": "Each entry was verified by independent web research (web_search / web_fetch) performed fresh against primary and secondary sources. The stored Parallel evidence was NOT re-read when forming the independent finding, so a source the pipeline never retrieved can and does contradict it (see Gene Austin and Meridian Records).",
+  "honesty_note": "This golden set was verified via independent AI-assisted web research, not a full manual paralegal review. Given the team size that was the achievable standard. Every source URL is listed so any entry can be re-checked by hand, and the two MISMATCH entries were found and recorded rather than smoothed over.",
+  "generated": "2026-09-08",
+  "counts": {
+    "total": 19,
+    "MATCH": 12,
+    "PARTIAL": 1,
+    "MISMATCH": 2,
+    "PENDING": 4
+  },
+  "entries": [
+    {
+      "item": "BYE BYE BLACKBIRD",
+      "normalized_name": "BYE BYE BLACKBIRD",
+      "category": "MUSIC",
+      "expected_category": "MUSIC",
+      "pipeline": {
+        "tier": "ESCALATE",
+        "rationale": "The musical composition \"Bye Bye Blackbird\" was written by Ray Henderson and Mort Dixon and first published in 1926 [ev_d4b2e8771a23, ev_13ffd09c3d82]. Because it was published before 1978, the composition has entered the public domain, provided its copyright was properly renewed [US_PUB_PRE_1978_95_YEARS]. However, the earliest sound recordings of the track were also published in 1926 [ev_692b5a5646d2, ev_399468fcfe08]. Under the Classics Protection and Access Act, a 1926 sound recording remains in copyright until January 1, 2027 [US_SOUND_RECORDING_MMA].",
+        "rule_outcomes": [
+          {
+            "rule_id": "US_PUB_PRE_1978_95_YEARS",
+            "outcome": "PUBLIC_DOMAIN",
+            "pd_year": 2022,
+            "missing": []
+          },
+          {
+            "rule_id": "US_SOUND_RECORDING_MMA",
+            "outcome": "IN_COPYRIGHT",
+            "pd_year": 2027,
+            "missing": []
+          }
+        ],
+        "rights_holder": "Ray Henderson Music Co., Inc. and Bughouse Music o/b/o Olde Clover Leaf Music",
+        "evidence_count": 16,
+        "pages": [
+          1
+        ],
+        "on_screen": false,
+        "depiction": "NEUTRAL"
+      },
+      "verification": {
+        "method": "web_search + web_fetch, fresh retrieval",
+        "finding": "Composition: 1926, written by composer Ray Henderson and lyricist Mort Dixon, published by Jerome Remick. First recorded by Sam Lanin's Dance Orchestra, March 1926; popular 1926 recordings by Nick Lucas, Gene Austin, Benny Krueger, Leo Reisman. Composition 1926 + 95 yr -> PD 2022. Sound recording 1926 under the Classics Protection and Access Act 100-yr band -> PD 2027.",
+        "sources": [
+          "https://en.wikipedia.org/wiki/Bye_Bye_Blackbird",
+          "https://digitalcommons.library.umaine.edu/mmb-vp/6056/",
+          "https://digitalcommons.conncoll.edu/sheetmusic/1825/"
+        ]
+      },
+      "verdict": "MATCH",
+      "note": "Both rights resolved separately and both term calculations independently confirmed. This is the flagship result: PD composition, in-copyright recording, from one 1926 date.",
+      "checks": {
+        "publication_year": 1926,
+        "composition_pd_year": 2022,
+        "recording_pd_year": 2027,
+        "two_distinct_rights": true,
+        "tier": "ESCALATE"
+      }
+    },
+    {
+      "item": "Gene Austin",
+      "normalized_name": "Gene Austin",
+      "category": "REAL_PERSON",
+      "expected_category": "REAL_PERSON",
+      "pipeline": {
+        "tier": "NEEDS_VERIFICATION",
+        "rationale": "The sources establish that the singer Gene Austin died in 1972 [ev_1eeb232a7ea1, ev_5385c3cb6c58]. The post-mortem right of publicity analysis returned an INSUFFICIENT_FACTS result because the state of domicile at death is missing [US_PUBLICITY_POSTMORTEM]. While some obituaries for individuals named Gene Austin mention Wisconsin and Oregon, these appear to be different people based on their birth years [ev_82ff0cc77128, ev_7fc1b11b4425].",
+        "rule_outcomes": [
+          {
+            "rule_id": "US_PUBLICITY_POSTMORTEM",
+            "outcome": "INSUFFICIENT_FACTS",
+            "pd_year": null,
+            "missing": [
+              "domicile_state_at_death"
+            ]
+          }
+        ],
+        "rights_holder": null,
+        "evidence_count": 8,
+        "pages": [
+          1,
+          5
+        ],
+        "on_screen": true,
+        "depiction": "NEUTRAL"
+      },
+      "verification": {
+        "method": "web_search + web_fetch of tshaonline.org (Texas State Historical Association)",
+        "finding": "Died 24 January 1972 in PALM SPRINGS, CALIFORNIA. Exact source sentence: 'Austin died on January 24, 1972, in Palm Springs, California, and was survived by his wife Gigi and his two daughters.' He retired to Palm Springs in the early 1960s, so California was his domicile at death. California post-mortem right of publicity is 70 years (Cal. Civ. Code s.3344.1): 1972 + 70 -> subsists through 2042.",
+        "sources": [
+          "https://www.tshaonline.org/handbook/entries/austin-gene",
+          "https://www.findagrave.com/memorial/2076/gene-austin",
+          "https://en.wikipedia.org/wiki/Gene_Austin"
+        ]
+      },
+      "verdict": "PARTIAL",
+      "note": "Death year 1972 correct and the refusal to guess was correct behaviour, but domicile IS findable in one fetch. This is a research-depth gap, not a reasoning error: the person brief should query 'died in <city>' explicitly.",
+      "checks": {
+        "person_death_year": 1972,
+        "domicile_state_at_death": "CA",
+        "expected_outcome_with_domicile": "RIGHT_SUBSISTS",
+        "pipeline_outcome": "INSUFFICIENT_FACTS",
+        "missing_fact_correctly_named": true
+      }
+    },
+    {
+      "item": "JONI MITCHELL",
+      "normalized_name": "JONI MITCHELL",
+      "category": "REAL_PERSON",
+      "expected_category": "REAL_PERSON",
+      "pipeline": {
+        "tier": "ESCALATE",
+        "rationale": "Multiple sources confirm that Joni Mitchell is a living Canadian singer-songwriter born on November 7, 1943 [ev_1300295c53bc, ev_34924ff45f86]. Because she is currently living, the right of publicity subsists in full [US_PUBLICITY_POSTMORTEM]. Although one source contains an obituary, it is explicitly marked as a work of fiction [ev_f6c8b4343c05]. Official channels direct media and permission inquiries to Rhino Records Publicity [ev_325a6b78d235].",
+        "rule_outcomes": [
+          {
+            "rule_id": "US_PUBLICITY_POSTMORTEM",
+            "outcome": "RIGHT_SUBSISTS",
+            "pd_year": null,
+            "missing": []
+          }
+        ],
+        "rights_holder": "null",
+        "evidence_count": 8,
+        "pages": [
+          4
+        ],
+        "on_screen": false,
+        "depiction": "POSITIVE"
+      },
+      "verification": {
+        "method": "web_search, fresh retrieval September 2026",
+        "finding": "ALIVE. Age 82 (b. 7 November 1943). Attended the 68th Grammy Awards on 1 February 2026 and won her eleventh Grammy for Best Historical Album; set to receive a lifetime achievement award at the 2026 Juno Awards. Search results ALSO surfaced a Necropedia 'obituary' page and a documented celebrity death hoax page.",
+        "sources": [
+          "https://en.wikipedia.org/wiki/Joni_Mitchell",
+          "https://www.hollywoodreporter.com/music/music-news/joni-mitchell-2026-juno-awards-1236509721/",
+          "https://en.mediamass.net/people/joni-mitchell/deathhoax.html"
+        ]
+      },
+      "verdict": "MATCH",
+      "note": "Independent search hit the same fictional-obituary contamination the pipeline flagged and reasoned past. Bad-source detection confirmed against a real adversarial source.",
+      "checks": {
+        "is_person_living": true,
+        "tier": "ESCALATE",
+        "bad_source_flagged": true
+      }
+    },
+    {
+      "item": "THE GREAT GATSBY",
+      "normalized_name": "THE GREAT GATSBY",
+      "category": "PUBLISHED_WORK",
+      "expected_category": "PUBLISHED_WORK",
+      "pipeline": {
+        "tier": "CLEAR_ON_RECORD",
+        "rationale": "The original 1925 publication of F. Scott Fitzgerald's novel 'The Great Gatsby' entered the public domain in the United States on January 1, 2021 [US_PUB_PRE_1978_95_YEARS, ev_3b7625641e4d, ev_67f45b180332]. Multiple sources confirm that the 95-year copyright term for the original text has expired [ev_71c83677ab22, ev_7631a532be88, ev_e8e319c52723]. However, elements unique to later film adaptations or specific visual designs may still be protected by copyright [ev_e80fdf245475].",
+        "rule_outcomes": [
+          {
+            "rule_id": "US_PUB_PRE_1978_95_YEARS",
+            "outcome": "PUBLIC_DOMAIN",
+            "pd_year": 2021,
+            "missing": []
+          }
+        ],
+        "rights_holder": "Fitzgerald's literary estate",
+        "evidence_count": 8,
+        "pages": [
+          3
+        ],
+        "on_screen": true,
+        "depiction": "NEUTRAL"
+      },
+      "verification": {
+        "method": "web_search, fresh retrieval",
+        "finding": "F. Scott Fitzgerald, first published April 1925. Entered the US public domain on 1 January 2021 under the 95-year term. Widely documented as a Public Domain Day 2021 work alongside Mrs Dalloway.",
+        "sources": [
+          "https://www.npr.org/2021/01/01/951171599/party-like-its-1925-on-public-domain-day-gatsby-and-dalloway-are-in",
+          "https://web.law.duke.edu/cspd/publicdomainday/2021/",
+          "https://copyrightlately.com/great-gatsby-public-domain/"
+        ]
+      },
+      "verdict": "MATCH",
+      "note": "1925 + 95 + 1 = 2021 confirmed exactly. Only CLEAR_ON_RECORD item in the run, and the open question about modern cover art still being in copyright is a genuinely correct caveat.",
+      "checks": {
+        "publication_year": 1925,
+        "pd_year": 2021,
+        "tier": "CLEAR_ON_RECORD"
+      }
+    },
+    {
+      "item": "COCA-COLA",
+      "normalized_name": "COCA-COLA",
+      "category": "BRAND_TRADEMARK",
+      "expected_category": "BRAND_TRADEMARK",
+      "pipeline": {
+        "tier": "NEEDS_VERIFICATION",
+        "rationale": "The Coca-Cola Company maintains multiple active trademark registrations for the \"Coca-Cola\" name and its distinctive bottle shape [ev_c86ccc15c022, ev_ea673d69f1c9]. Because trademark rights do not expire on a fixed term and the marks remain active, term arithmetic does not apply [TRADEMARK_NO_EXPIRY]. The mark appears on screen in a neutral depiction, which requires an assessment of whether the use is nominative or implies endorsement [TRADEMARK_NO_EXPIRY].",
+        "rule_outcomes": [
+          {
+            "rule_id": "TRADEMARK_NO_EXPIRY",
+            "outcome": "NOT_APPLICABLE",
+            "pd_year": null,
+            "missing": []
+          }
+        ],
+        "rights_holder": "Coca Cola Company, The",
+        "evidence_count": 8,
+        "pages": [
+          1
+        ],
+        "on_screen": true,
+        "depiction": "NEUTRAL"
+      },
+      "verification": {
+        "method": "web_search of USPTO-derived records",
+        "finding": "COCA-COLA, Registration #3252896, serial #78509545, owned by The Coca-Cola Company (Atlanta, GA). Status LIVE / REGISTERED AND RENEWED. Covers non-alcoholic beverages, soft drinks, syrups and concentrates.",
+        "sources": [
+          "https://uspto.report/TM/78509545/",
+          "https://www.trademarkia.com/coca-cola-78509545",
+          "https://www.gerbenlaw.com/blog/coca-cola-trademarks/"
+        ]
+      },
+      "verdict": "MATCH",
+      "note": "Registrant and live status correct. Neutral on-screen use correctly tiered NEEDS_VERIFICATION after the narrowed trigger.",
+      "checks": {
+        "registrant": "The Coca-Cola Company",
+        "status": "LIVE",
+        "tier": "NEEDS_VERIFICATION",
+        "depiction": "NEUTRAL"
+      }
+    },
+    {
+      "item": "NIKE",
+      "normalized_name": "NIKE",
+      "category": "BRAND_TRADEMARK",
+      "expected_category": "BRAND_TRADEMARK",
+      "pipeline": {
+        "tier": "NEEDS_VERIFICATION",
+        "rationale": "The Nike trademark is currently registered and owned by Nike, Inc. for goods such as athletic shoes [ev_64d6a44e8b1c, ev_8ec36c349ebe, ev_6fe8d6351b17]. Trademark rights do not expire on a fixed term, meaning standard public domain arithmetic does not apply to this asset [TRADEMARK_NO_EXPIRY]. Because this active trademark appears on screen in the production, the item requires escalation to evaluate the nature of the depiction [TRADEMARK_NO_EXPIRY].",
+        "rule_outcomes": [
+          {
+            "rule_id": "TRADEMARK_NO_EXPIRY",
+            "outcome": "NOT_APPLICABLE",
+            "pd_year": null,
+            "missing": []
+          }
+        ],
+        "rights_holder": "Nike, Inc.",
+        "evidence_count": 8,
+        "pages": [
+          3
+        ],
+        "on_screen": true,
+        "depiction": "NEUTRAL"
+      },
+      "verification": {
+        "method": "web_search",
+        "finding": "NIKE and associated marks are live registered trademarks owned by Nike, Inc. (Beaverton, OR) across footwear and sporting goods classes.",
+        "sources": [
+          "https://trademarks.justia.com/owners/nike-inc-1889449/"
+        ]
+      },
+      "verdict": "MATCH",
+      "note": "Registrant correct; neutral background wardrobe use correctly de-escalated to NEEDS_VERIFICATION.",
+      "checks": {
+        "registrant": "Nike, Inc.",
+        "tier": "NEEDS_VERIFICATION",
+        "depiction": "NEUTRAL"
+      }
+    },
+    {
+      "item": "MARLBORO",
+      "normalized_name": "MARLBORO",
+      "category": "BRAND_TRADEMARK",
+      "expected_category": "BRAND_TRADEMARK",
+      "pipeline": {
+        "tier": "NEEDS_VERIFICATION",
+        "rationale": "Multiple sources confirm that Marlboro is an active, registered trademark owned by Philip Morris USA Inc. [ev_e7ca96022613] [ev_138dafa58e92]. Trademark rights do not expire on a fixed term, meaning standard public domain arithmetic is not applicable [TRADEMARK_NO_EXPIRY]. Since the active trademark appears on screen, the depiction must be evaluated for nominative use, implied endorsement, or disparagement [TRADEMARK_NO_EXPIRY].",
+        "rule_outcomes": [
+          {
+            "rule_id": "TRADEMARK_NO_EXPIRY",
+            "outcome": "NOT_APPLICABLE",
+            "pd_year": null,
+            "missing": []
+          }
+        ],
+        "rights_holder": "Philip Morris USA Inc.",
+        "evidence_count": 8,
+        "pages": [
+          3
+        ],
+        "on_screen": true,
+        "depiction": "NEUTRAL"
+      },
+      "verification": {
+        "method": "web_search",
+        "finding": "MARLBORO is a live registered trademark maintained by Philip Morris USA Inc. for tobacco products.",
+        "sources": [
+          "https://trademarks.justia.com/owners/philip-morris-usa-inc-1929188/"
+        ]
+      },
+      "verdict": "MATCH",
+      "note": "Registrant correct. Worth noting for counsel: tobacco depiction carries regulatory exposure beyond trademark, which the pipeline did not raise.",
+      "checks": {
+        "registrant": "Philip Morris USA Inc.",
+        "tier": "NEEDS_VERIFICATION"
+      }
+    },
+    {
+      "item": "NEUMANN U 87",
+      "normalized_name": "NEUMANN U 87",
+      "category": "BRAND_TRADEMARK",
+      "expected_category": "BRAND_TRADEMARK",
+      "pipeline": {
+        "tier": "ESCALATE",
+        "rationale": "The \"NEUMANN\" trademark is currently registered and active [ev_25b73fe4a4d0, ev_3c33170535d9]. The Neumann U87 is a studio microphone that appears on screen in a positive depiction [ev_575e380bd5da]. Because trademark rights do not expire on a fixed term, standard public domain arithmetic does not apply to this item [TRADEMARK_NO_EXPIRY].",
+        "rule_outcomes": [
+          {
+            "rule_id": "TRADEMARK_NO_EXPIRY",
+            "outcome": "NOT_APPLICABLE",
+            "pd_year": null,
+            "missing": []
+          }
+        ],
+        "rights_holder": "null",
+        "evidence_count": 8,
+        "pages": [
+          2
+        ],
+        "on_screen": true,
+        "depiction": "POSITIVE"
+      },
+      "verification": {
+        "method": "web_search",
+        "finding": "The Neumann U 87 is manufactured by Georg Neumann GmbH ('Neumann.Berlin'), a subsidiary of Sennheiser electronic GmbH & Co. KG since its 1991 acquisition. Mark is live.",
+        "sources": [
+          "https://en.wikipedia.org/wiki/Neumann_U_87",
+          "https://en-de.neumann.com/",
+          "https://www.sweetwater.com/insync/10-things-you-didnt-know-about-neumann-microphones/"
+        ]
+      },
+      "verdict": "MATCH",
+      "note": "Georg Neumann GmbH correct. POSITIVE on-screen depiction correctly forced ESCALATE under the false-endorsement trigger.",
+      "checks": {
+        "registrant": "Georg Neumann GmbH",
+        "tier": "ESCALATE",
+        "depiction": "POSITIVE",
+        "escalated_for_endorsement": true
+      }
+    },
+    {
+      "item": "CHATEAU MARMONT",
+      "normalized_name": "CHATEAU MARMONT",
+      "category": "REAL_LOCATION_BUSINESS",
+      "expected_category": "REAL_LOCATION_BUSINESS",
+      "pipeline": {
+        "tier": "ESCALATE",
+        "rationale": "The Chateau Marmont is a real hotel owned by Andr\u00e9 Balazs and Group 99, LLC, which holds multiple active trademark registrations for the name [ev_bc50a999974e, ev_d20c6b67530d]. Trademark rights do not expire on a fixed term, and the records confirm these marks are currently registered [TRADEMARK_NO_EXPIRY, ev_7989bba2b976]. Because the hotel appears on screen and the script features a negative depiction of this real business, this item requires escalation to assess disparagement risks [TRADEMARK_NO_EXPIRY].",
+        "rule_outcomes": [
+          {
+            "rule_id": "TRADEMARK_NO_EXPIRY",
+            "outcome": "NOT_APPLICABLE",
+            "pd_year": null,
+            "missing": []
+          }
+        ],
+        "rights_holder": "Group 99, LLC",
+        "evidence_count": 8,
+        "pages": [
+          1
+        ],
+        "on_screen": true,
+        "depiction": "NEGATIVE"
+      },
+      "verification": {
+        "method": "web_search",
+        "finding": "CHATEAU MARMONT is a registered trademark of Group 99, LLC (Reg. #5880550, serial #87508003), the entity that controls the hotel's IP. Hotel acquired by Andre Balazs in 1990. Group 99 has actively enforced the mark, including a 2017 cease-and-desist against a cat hotel named 'Cateau Marmont'.",
+        "sources": [
+          "https://trademarks.justia.com/875/08/chateau-87508003.html",
+          "https://www.techdirt.com/2017/08/23/chateau-marmont-hotel-celebrity-humans-sends-trademark-cd-to-cateau-marmont-hotel-cats/",
+          "https://en.wikipedia.org/wiki/Chateau_Marmont"
+        ]
+      },
+      "verdict": "MATCH",
+      "note": "Group 99, LLC and Balazs both correct. Independent research additionally found a documented enforcement history, which strengthens the ESCALATE on negative depiction.",
+      "checks": {
+        "registrant": "Group 99, LLC",
+        "tier": "ESCALATE",
+        "depiction": "NEGATIVE"
+      }
+    },
+    {
+      "item": "Meridian Records",
+      "normalized_name": "Meridian Records",
+      "category": "REAL_LOCATION_BUSINESS",
+      "expected_category": "BRAND_TRADEMARK",
+      "pipeline": {
+        "tier": "ESCALATE",
+        "rationale": "Meridian Records is an existing classical music label managed by Richard Hughes and Susanne Stanzeleit [ev_f57692b124cd]. The term \"Meridian\" is a registered trademark currently owned by Scotsman Group LLC [ev_f00e36f67667]. Trademark rights do not expire on a fixed term, meaning the mark remains active [TRADEMARK_NO_EXPIRY]. Since the script contains a negative depiction of this real business, further assessment is necessary to evaluate disparagement risks [TRADEMARK_NO_EXPIRY].",
+        "rule_outcomes": [
+          {
+            "rule_id": "TRADEMARK_NO_EXPIRY",
+            "outcome": "NOT_APPLICABLE",
+            "pd_year": null,
+            "missing": []
+          }
+        ],
+        "rights_holder": "Scotsman Group LLC",
+        "evidence_count": 8,
+        "pages": [
+          3,
+          4
+        ],
+        "on_screen": false,
+        "depiction": "NEGATIVE"
+      },
+      "verification": {
+        "method": "web_search",
+        "finding": "The real Meridian Records is a BRITISH independent CLASSICAL label based in London, founded 1977 by Francis Loring and John Shuttleworth. No Nashville label of that name was found. Scotsman Group LLC is a commercial ice-machine manufacturer that holds a 'Meridian' mark in an unrelated class.",
+        "sources": [
+          "https://en.wikipedia.org/wiki/Meridian_Records",
+          "https://www.meridian-records.co.uk/"
+        ]
+      },
+      "verdict": "MISMATCH",
+      "note": "Wrong entity. The pipeline matched the bare string 'Meridian' to a trademark register hit (Scotsman Group LLC, ice machines) instead of the actual record label. Category was also wrong: REAL_LOCATION_BUSINESS rather than BRAND_TRADEMARK. The NEGATIVE depiction and ESCALATE tier were still correct.",
+      "checks": {
+        "correct_entity": "Meridian Records (UK classical label, est. 1977)",
+        "pipeline_entity": "Scotsman Group LLC",
+        "entity_correct": false,
+        "tier": "ESCALATE",
+        "tier_correct": true,
+        "depiction": "NEGATIVE"
+      }
+    },
+    {
+      "item": "MERIDIAN SOUND",
+      "normalized_name": "MERIDIAN SOUND",
+      "category": "NAME_COLLISION",
+      "expected_category": "NAME_COLLISION",
+      "pipeline": {
+        "tier": "ESCALATE",
+        "rationale": "The name Meridian Sound corresponds to an active trademark owned by Meridian Audio Ltd, a real-world audio technology company [ev_6a3dd0aa5217, ev_a5b484bf5331]. Multiple active trademark registrations exist for the term MERIDIAN in connection with sound reproduction and audio equipment [ev_d9605404b62a, ev_c4ce9052abce]. Because trademark rights do not expire on a fixed term and the mark is currently active, standard term arithmetic does not apply [TRADEMARK_NO_EXPIRY]. The script indicates this active trademark will appear on screen in multiple scenes, requiring further review of the specific visual context [TRADEMARK_NO_EXPIRY].",
+        "rule_outcomes": [
+          {
+            "rule_id": "TRADEMARK_NO_EXPIRY",
+            "outcome": "NOT_APPLICABLE",
+            "pd_year": null,
+            "missing": []
+          }
+        ],
+        "rights_holder": "MERIDIAN AUDIO LIMITED",
+        "evidence_count": 8,
+        "pages": [
+          2,
+          3,
+          4,
+          5
+        ],
+        "on_screen": true,
+        "depiction": "NEUTRAL"
+      },
+      "verification": {
+        "method": "web_search",
+        "finding": "Meridian Audio Ltd is a real British high-end audio manufacturer holding active 'MERIDIAN' marks in the audio class, and supplies in-car sound systems to Jaguar Land Rover. A separate active 'Meridian' mark is held by Meridian Lightweight Technologies, Inc. in an unrelated class.",
+        "sources": [
+          "https://www.meridian-audio.com/",
+          "https://trademarks.justia.com/owners/meridian-audio-limited-4262871/"
+        ]
+      },
+      "verdict": "MATCH",
+      "note": "Correct real-entity collision found for a fictional studio name, and correctly kept distinct from 'Meridian Records'. This is the NAME_COLLISION category working as designed.",
+      "checks": {
+        "real_entity_exists": true,
+        "entity": "Meridian Audio Ltd",
+        "distinct_from_meridian_records": true,
+        "tier": "ESCALATE"
+      }
+    },
+    {
+      "item": "Clinton administration",
+      "normalized_name": "Clinton administration",
+      "category": "REAL_PERSON",
+      "expected_category": "NOT_AN_ITEM",
+      "pipeline": {
+        "tier": "ESCALATE",
+        "rationale": "Sources confirm that former U.S. president Bill Clinton is currently living [ev_39bb8c96d398]. Because he is a living individual, his right of publicity subsists in full [US_PUBLICITY_POSTMORTEM]. Although the script only references him off-screen in a neutral context, his status as a living person triggers an automatic escalation for further review [US_PUBLICITY_POSTMORTEM].",
+        "rule_outcomes": [
+          {
+            "rule_id": "US_PUBLICITY_POSTMORTEM",
+            "outcome": "RIGHT_SUBSISTS",
+            "pd_year": null,
+            "missing": []
+          }
+        ],
+        "rights_holder": "UNKNOWN",
+        "evidence_count": 8,
+        "pages": [
+          1
+        ],
+        "on_screen": false,
+        "depiction": "NEUTRAL"
+      },
+      "verification": {
+        "method": "web_search",
+        "finding": "'Clinton administration' in the script is an idiom in an action line ('a jukebox nobody has fed since the Clinton administration'), used to convey elapsed time. It is not a depiction of Bill Clinton. Bill Clinton is living (b. 1946), so a publicity right does subsist, but no depiction of him occurs in this screenplay.",
+        "sources": [
+          "https://en.wikipedia.org/wiki/Bill_Clinton"
+        ]
+      },
+      "verdict": "MISMATCH",
+      "note": "FALSE POSITIVE, retained deliberately as a precision test case. The living-person fact is right but the extraction is wrong: an idiomatic period reference is not a REAL_PERSON depiction. Escalating it costs reviewer attention on a non-item.",
+      "checks": {
+        "should_be_extracted": false,
+        "is_person_living": true,
+        "pipeline_tier": "ESCALATE",
+        "expected": "not extracted at all"
+      }
+    },
+    {
+      "item": "THE ECHO PLEX",
+      "normalized_name": "THE ECHO PLEX",
+      "category": "REAL_LOCATION_BUSINESS",
+      "expected_category": "REAL_LOCATION_BUSINESS",
+      "pipeline": {
+        "tier": "ESCALATE",
+        "rationale": "The Echoplex is a real music venue in Los Angeles currently owned by Live Nation [ev_f2f0dc9aec59]. Trademark searches show at least one live and registered mark for \"ECHOPLEX\" [ev_f85fa84b4f17], meaning trademark rights do not expire on a fixed term [TRADEMARK_NO_EXPIRY]. Because this is a real location appearing on screen, a location release or film permit is typically required to film on the premises [ev_d9aa7fb6ef67, ev_52bca165a989]. The reviewer must assess whether the on-screen use is nominative, implies endorsement, or is disparaging [TRADEMARK_NO_EXPIRY].",
+        "rule_outcomes": [
+          {
+            "rule_id": "TRADEMARK_NO_EXPIRY",
+            "outcome": "NOT_APPLICABLE",
+            "pd_year": null,
+            "missing": []
+          }
+        ],
+        "rights_holder": "Live Nation",
+        "evidence_count": 8,
+        "pages": [
+          4
+        ],
+        "on_screen": true,
+        "depiction": "NEUTRAL"
+      },
+      "verification": {
+        "method": "web_search",
+        "finding": "The Echoplex is a real Los Angeles music venue in Echo Park. Live Nation acquired it in May 2019 through the purchase of Spaceland Presents (Mitchell Frank), together with The Echo and The Regent, as part of a $20-25m Southern California venue spree.",
+        "sources": [
+          "https://www.musicbusinessworldwide.com/live-nation-buys-spaceland-presents-owner-of-the-los-angeles-echoplex-as-part-of-20m-socal-spending-spree/",
+          "https://ktla.com/news/local-news/concert-promotion-giant-live-nation-buys-echoplex-and-the-echo-in-echo-park-the-regent-in-dtla/amp/"
+        ]
+      },
+      "verdict": "MATCH",
+      "note": "Live Nation ownership and the 2019 acquisition confirmed exactly, including the Spaceland Presents route. The location-release open question is the right one.",
+      "checks": {
+        "owner": "Live Nation",
+        "acquired_year": 2019,
+        "permit_required": true,
+        "tier": "ESCALATE"
+      }
+    },
+    {
+      "item": "Penguin",
+      "normalized_name": "Penguin",
+      "category": "BRAND_TRADEMARK",
+      "expected_category": "BRAND_TRADEMARK",
+      "pipeline": {
+        "tier": "NEEDS_VERIFICATION",
+        "rationale": "The on-screen item \"Penguin Books\" corresponds to active, registered trademarks owned by Penguin Books Limited and Penguin Random House LLC for books and electronic publications [ev_1e03b1aababb, ev_9a8512777b75, ev_0b13cb94a4bf]. Trademark rights do not expire on a fixed term, meaning duration arithmetic does not apply to this analysis [TRADEMARK_NO_EXPIRY]. Because an active trademark appears on screen, this item requires escalation for further review [ev_f1491fe2d229].",
+        "rule_outcomes": [
+          {
+            "rule_id": "TRADEMARK_NO_EXPIRY",
+            "outcome": "NOT_APPLICABLE",
+            "pd_year": null,
+            "missing": []
+          }
+        ],
+        "rights_holder": "Penguin Books Limited",
+        "evidence_count": 8,
+        "pages": [
+          3
+        ],
+        "on_screen": true,
+        "depiction": "NEUTRAL"
+      },
+      "verification": {
+        "method": "web_search",
+        "finding": "PENGUIN is a live registered trademark of Penguin Books Limited and affiliated Penguin Random House entities, covering books and publishing services.",
+        "sources": [
+          "https://trademarks.justia.com/owners/penguin-books-limited-1817766/"
+        ]
+      },
+      "verdict": "MATCH",
+      "note": "Registrant correct. A paperback shown on screen is a real trade-dress question, correctly left at NEEDS_VERIFICATION rather than escalated.",
+      "checks": {
+        "registrant": "Penguin Books Limited",
+        "tier": "NEEDS_VERIFICATION"
+      }
+    },
+    {
+      "item": "Rolex Submariner",
+      "normalized_name": "Rolex Submariner",
+      "category": "BRAND_TRADEMARK",
+      "expected_category": "BRAND_TRADEMARK",
+      "pipeline": {
+        "tier": "NEEDS_VERIFICATION",
+        "rationale": "The sources confirm that \"SUBMARINER\" and \"ROLEX\" are active, registered trademarks owned by Rolex Watch U.S.A., Inc. [ev_9cbbc1669e1e], [ev_5e213740fc0f]. Trademark rights do not expire on a fixed term, so standard duration arithmetic does not apply to this asset [TRADEMARK_NO_EXPIRY]. Because the mark appears on screen, the reviewer must evaluate whether the depiction implies endorsement or constitutes disparagement [TRADEMARK_NO_EXPIRY].",
+        "rule_outcomes": [
+          {
+            "rule_id": "TRADEMARK_NO_EXPIRY",
+            "outcome": "NOT_APPLICABLE",
+            "pd_year": null,
+            "missing": []
+          }
+        ],
+        "rights_holder": "Rolex Watch U.S.A., Inc.",
+        "evidence_count": 8,
+        "pages": [
+          1
+        ],
+        "on_screen": true,
+        "depiction": "NEUTRAL"
+      },
+      "verification": {
+        "method": "web_search",
+        "finding": "SUBMARINER and ROLEX are live registered trademarks owned by Rolex Watch U.S.A., Inc. in Class 14 (horological instruments); Rolex actively opposes confusingly similar marks.",
+        "sources": [
+          "https://trademarks.justia.com/owners/rolex-watch-usa-inc-1798877/"
+        ]
+      },
+      "verdict": "MATCH",
+      "note": "Registrant and enforcement posture correct.",
+      "checks": {
+        "registrant": "Rolex Watch U.S.A., Inc.",
+        "tier": "NEEDS_VERIFICATION"
+      }
+    },
+    {
+      "item": "Capitol Records logo",
+      "normalized_name": "Capitol Records",
+      "category": "LOGO_PROP",
+      "expected_category": "LOGO_PROP",
+      "pipeline": {
+        "tier": null,
+        "status": "NOT_YET_RUN"
+      },
+      "verification": {
+        "method": "web_search",
+        "finding": "CAPITOL RECORDS is a registered trademark (Reg. #1862994) owned by Capitol Records, LLC (Santa Monica, CA); the label is owned by Universal Music Group via Capitol Music Group. The stacked-coin roundel logo is separately protected as a design mark.",
+        "sources": [
+          "https://en.wikipedia.org/wiki/Capitol_Records",
+          "https://www.trademarkia.com/capitol-records-74801863"
+        ]
+      },
+      "verdict": "PENDING",
+      "note": "Ground truth established; pipeline has not yet run this scene (Gemini spend cap).",
+      "checks": {
+        "registrant": "Capitol Records, LLC",
+        "parent": "Universal Music Group",
+        "expected_tier": "NEEDS_VERIFICATION or ESCALATE"
+      }
+    },
+    {
+      "item": "FedEx box wordmark",
+      "normalized_name": "FedEx",
+      "category": "LOGO_PROP",
+      "expected_category": "LOGO_PROP",
+      "pipeline": {
+        "tier": null,
+        "status": "NOT_YET_RUN"
+      },
+      "verification": {
+        "method": "web_search",
+        "finding": "FEDEX is a live registered trademark (Reg. #5484324) owned by Federal Express Corporation (Memphis, TN). The wordmark uses a proprietary typeface containing the well-known hidden arrow in the negative space between E and X.",
+        "sources": [
+          "https://uspto.report/TM/75902270",
+          "https://www.trademarkia.com/fedex-87565158"
+        ]
+      },
+      "verdict": "PENDING",
+      "note": "Ground truth established; awaiting pipeline run.",
+      "checks": {
+        "registrant": "Federal Express Corporation",
+        "expected_tier": "NEEDS_VERIFICATION or ESCALATE"
+      }
+    },
+    {
+      "item": "Apple logo on laptop lid",
+      "normalized_name": "Apple",
+      "category": "LOGO_PROP",
+      "expected_category": "LOGO_PROP",
+      "pipeline": {
+        "tier": null,
+        "status": "NOT_YET_RUN"
+      },
+      "verification": {
+        "method": "web_search",
+        "finding": "The Apple logo is a registered trademark of Apple Inc. Apple publishes explicit product-placement guidance and does not permit its products to be depicted in a negative light; an illuminated logo facing camera for a full scene is prominent rather than incidental use.",
+        "sources": [
+          "https://www.apple.com/legal/intellectual-property/guidelinesfor3rdparties.html"
+        ]
+      },
+      "verdict": "PENDING",
+      "note": "Ground truth established; awaiting pipeline run. Strong test of prominent vs incidental on-screen logo use.",
+      "checks": {
+        "registrant": "Apple Inc.",
+        "has_published_usage_policy": true,
+        "expected_tier": "NEEDS_VERIFICATION or ESCALATE"
+      }
+    },
+    {
+      "item": "Starbucks siren logo on cup",
+      "normalized_name": "Starbucks",
+      "category": "LOGO_PROP",
+      "expected_category": "LOGO_PROP",
+      "pipeline": {
+        "tier": null,
+        "status": "NOT_YET_RUN"
+      },
+      "verification": {
+        "method": "web_search",
+        "finding": "Starbucks owns federal registrations for its name and its green siren logo, first registered 4 April 1985, and has litigated the siren mark repeatedly (including a 2023 dispute settled with a rival coffee retailer).",
+        "sources": [
+          "https://about.starbucks.com/history/the-evolution-of-our-logo/",
+          "https://news.bloomberglaw.com/ip-law/starbucks-coffee-retailer-settle-siren-logo-trademark-lawsuit"
+        ]
+      },
+      "verdict": "PENDING",
+      "note": "Ground truth established; awaiting pipeline run. Active enforcement history makes this a good escalation test.",
+      "checks": {
+        "registrant": "Starbucks Corporation",
+        "enforcement_history": true,
+        "expected_tier": "NEEDS_VERIFICATION or ESCALATE"
+      }
+    }
+  ]
+}

@@ -34,8 +34,12 @@ DEFAULT_RULES_PATH = DATA_DIR / "copyright_rules.yaml"
 class Settings(BaseSettings):
     """All runtime configuration, loaded from the environment or a ``.env`` file."""
 
+    # env_file is anchored to the repository root rather than left relative.
+    # As a relative path it resolved against the process working directory, so
+    # running from any other directory silently loaded no .env at all and every
+    # key came back None.
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=(PROJECT_ROOT / ".env", ".env"),
         env_file_encoding="utf-8",
         extra="ignore",
         case_sensitive=False,
@@ -347,6 +351,102 @@ def build_safety_settings(settings: Optional["Settings"] = None) -> list:
         types.SafetySetting(category=category, threshold=threshold)
         for category in categories
     ]
+
+
+def describe_key_source(name: str, settings: "Settings") -> dict[str, Any]:
+    """Report where a secret resolved from, without ever revealing its value.
+
+    Precedence in pydantic-settings is: init kwargs > OS environment > .env file
+    > defaults. An OS variable therefore shadows the ``.env`` entry, including
+    when it is set but empty, which is almost always an accident.
+
+    Args:
+        name: Environment variable name, e.g. ``"PARALLEL_API_KEY"``.
+        settings: Loaded settings.
+
+    Returns:
+        A dict describing presence, length and origin. Never contains the key.
+    """
+    resolver = {
+        "PARALLEL_API_KEY": resolve_parallel_api_key,
+        "GOOGLE_API_KEY": resolve_google_api_key,
+    }.get(name)
+    value = resolver(settings) if resolver else os.getenv(name)
+
+    raw_env = os.environ.get(name)
+    if raw_env is not None and raw_env.strip() == "":
+        source = "OS environment (SET BUT EMPTY - shadows .env)"
+    elif raw_env:
+        source = "OS environment"
+    elif value:
+        source = ".env file or Secret Manager"
+    else:
+        source = "NOT FOUND"
+
+    if settings.use_secret_manager and settings.google_cloud_project and value:
+        source = f"Secret Manager (or fallback: {source})"
+
+    return {
+        "name": name,
+        "present": bool(value),
+        "length": len(value) if value else 0,
+        "prefix": (value[:4] + "...") if value and len(value) > 8 else None,
+        "source": source,
+        "env_shadowing_dotenv": raw_env is not None,
+    }
+
+
+def preflight(settings: Optional["Settings"] = None, stage: str = "") -> list[dict[str, Any]]:
+    """Log the resolved state of every secret before a stage that needs one.
+
+    Emits the length and origin of each key and never the key itself. This exists
+    so a missing or shadowed credential is visible at the top of a run rather
+    than surfacing as an authentication error deep inside a concurrent fan-out,
+    where it is attributed to the wrong component.
+
+    Args:
+        settings: Loaded settings; read from the environment if omitted.
+        stage: Name of the stage about to run, for the log line.
+
+    Returns:
+        One descriptor per key, suitable for the audit trail.
+    """
+    settings = settings or get_settings()
+    reports = [
+        describe_key_source("GOOGLE_API_KEY", settings),
+        describe_key_source("PARALLEL_API_KEY", settings),
+    ]
+    label = f" before {stage}" if stage else ""
+    logger.info("ClearFrame credential preflight%s:", label)
+    for report in reports:
+        if report["present"]:
+            logger.info(
+                "  %s: resolved, length=%d, prefix=%s, source=%s",
+                report["name"],
+                report["length"],
+                report["prefix"],
+                report["source"],
+            )
+        else:
+            logger.error(
+                "  %s: NOT RESOLVED (source=%s). Calls requiring it will fail.",
+                report["name"],
+                report["source"],
+            )
+        if "SET BUT EMPTY" in report["source"]:
+            logger.error(
+                "  %s is set to an empty string in the OS environment, which "
+                "shadows the .env value. Unset it: `unset %s`",
+                report["name"],
+                report["name"],
+            )
+    if settings.google_genai_use_vertexai:
+        logger.info("  Gemini auth path: Vertex AI (API key ignored, ADC used)")
+    else:
+        logger.info("  Gemini auth path: AI Studio API key")
+    logger.info("  .env searched at: %s (exists=%s)", PROJECT_ROOT / ".env",
+                (PROJECT_ROOT / ".env").exists())
+    return reports
 
 
 @functools.lru_cache(maxsize=1)

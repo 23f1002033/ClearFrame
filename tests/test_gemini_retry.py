@@ -157,3 +157,24 @@ def test_retry_setting_is_actually_applied() -> None:
     from clearframe.tools import gemini_client
 
     assert "gemini_max_retries" in inspect.getsource(gemini_client.generate_with_retry)
+
+
+@pytest.mark.parametrize(
+    "message",
+    [
+        "429 RESOURCE_EXHAUSTED. Your project has exceeded its monthly spending cap.",
+        "429 RESOURCE_EXHAUSTED. You exceeded your current quota, please check your plan and billing details.",
+    ],
+)
+def test_billing_cap_is_not_retried_despite_being_a_429(message: str) -> None:
+    """A spend cap reports as 429 but never clears on its own.
+
+    Retrying it burns the backoff window and buries the one message the operator
+    actually needs to act on.
+    """
+    assert not is_retryable(_Err(message, 429))
+
+
+def test_ordinary_rate_limit_is_still_retried() -> None:
+    """Narrowing the 429 handling must not disable genuine rate-limit retries."""
+    assert is_retryable(_Err("429 RESOURCE_EXHAUSTED: rate limit exceeded, try again", 429))

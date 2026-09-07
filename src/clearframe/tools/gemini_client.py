@@ -45,6 +45,14 @@ _FATAL_TOKENS = (
     "unauthenticated",
     "invalid argument",
     "not found",
+    # A billing cap is reported as 429 RESOURCE_EXHAUSTED, the same status as an
+    # ordinary rate limit, but it does not clear on its own. Retrying it wastes
+    # the backoff window and buries the one message the operator needs to see.
+    "spending cap",
+    "spend cap",
+    "billing",
+    "exceeded your current quota",
+    "check your plan",
 )
 
 
