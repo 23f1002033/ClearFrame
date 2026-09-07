@@ -1,0 +1,225 @@
+# ClearFrame deterministic copyright & publicity term rules
+#
+# These rules are applied by src/clearframe/tools/rules_engine.py using pure
+# Python arithmetic. No LLM reads or interprets this file. Every rule carries a
+# statutory citation that is surfaced in the RuleOutcome so a reviewer can
+# check the arithmetic against the source.
+#
+# TERM CONVENTION
+#   `public_domain_year` is the first calendar year in which the work is in the
+#   public domain. Both jurisdictions run terms to the end of a calendar year,
+#   so the uniform formula is:  pd_year = anchor_year + term_years + 1
+#     US   life+70, author died 2001  -> 2001 + 70 + 1 = 2072
+#     IN   life+60, author died 2001  -> 2001 + 60 + 1 = 2062
+#     US   95-from-publication, 1930  -> 1930 + 95 + 1 = 2026
+#
+# SCOPE LIMIT
+#   These rules cover the common screenplay clearance cases. They are a triage
+#   aid, not a title opinion. Where a rule has a known caveat that materially
+#   changes the answer (US renewal for 1930-1963, restored foreign works), the
+#   caveat is stated in `caveat` and is copied verbatim into the RuleOutcome so
+#   it reaches the reviewer.
+
+version: "2026.1"
+default_jurisdiction: US
+
+jurisdictions:
+  US:
+    name: "United States"
+    copyright_statute: "17 U.S.C. §§ 302-305"
+    life_plus_term: 70
+    corporate_publication_term: 95
+    corporate_creation_term: 120
+    federal_publicity_right: false
+  IN:
+    name: "India"
+    copyright_statute: "Copyright Act, 1957 (India), §§ 22-29"
+    life_plus_term: 60
+    corporate_publication_term: 60
+    corporate_creation_term: null
+    federal_publicity_right: false
+
+rules:
+
+  # ---------------------------------------------------------------- US works
+  - rule_id: US_PUB_PRE_1978_95_YEARS
+    jurisdiction: US
+    applies_to_work_types:
+      [MUSICAL_COMPOSITION, LITERARY_WORK, DRAMATIC_WORK, VISUAL_ARTWORK, FILM_AUDIOVISUAL]
+    condition: "published_before_1978"
+    term_years: 95
+    anchor: publication_year
+    required_facts: [publication_year]
+    citation: "17 U.S.C. § 304(b); Sonny Bono Copyright Term Extension Act, Pub. L. 105-298"
+    description: >-
+      US works published before 1978 are protected for 95 years from first
+      publication. Works whose 95-year term has run are in the public domain.
+    caveat: >-
+      Works first published in the US between 1930 and 1963 required renewal in
+      the 28th year. A substantial share were never renewed and are already in
+      the public domain. This rule assumes renewal; confirm renewal status in
+      the Copyright Office records before relying on an IN_COPYRIGHT outcome.
+
+  - rule_id: US_LIFE_PLUS_70
+    jurisdiction: US
+    applies_to_work_types:
+      [MUSICAL_COMPOSITION, LITERARY_WORK, DRAMATIC_WORK, VISUAL_ARTWORK, SOUND_RECORDING]
+    condition: "created_1978_or_later_individual_author"
+    term_years: 70
+    anchor: author_death_year
+    required_facts: [author_death_year]
+    citation: "17 U.S.C. § 302(a)"
+    description: >-
+      Works created on or after 1 January 1978 by an identified individual
+      author are protected for the life of the author plus 70 years.
+    caveat: null
+
+  - rule_id: US_CORPORATE_95_FROM_PUBLICATION
+    jurisdiction: US
+    applies_to_work_types:
+      [MUSICAL_COMPOSITION, LITERARY_WORK, DRAMATIC_WORK, VISUAL_ARTWORK, FILM_AUDIOVISUAL, SOUND_RECORDING]
+    condition: "corporate_anonymous_or_work_for_hire"
+    term_years: 95
+    alternate_term_years: 120
+    anchor: publication_year
+    alternate_anchor: creation_year
+    required_facts: [publication_year]
+    citation: "17 U.S.C. § 302(c)"
+    description: >-
+      Anonymous works, pseudonymous works, and works made for hire are protected
+      for 95 years from first publication or 120 years from creation, whichever
+      expires first.
+    caveat: null
+
+  # ------------------------------------------------- US sound recordings (MMA)
+  # Sound recordings are a separate copyright from the underlying musical
+  # composition and run on their own schedule. Clearing one does not clear the
+  # other. This is the most common clearance error in music.
+  - rule_id: US_SOUND_RECORDING_MMA
+    jurisdiction: US
+    applies_to_work_types: [SOUND_RECORDING]
+    condition: "published_before_1972-02-15"
+    anchor: publication_year
+    required_facts: [publication_year]
+    citation: "Music Modernization Act, Title II (Classics Protection and Access Act), 17 U.S.C. § 1401"
+    description: >-
+      Pre-1972 sound recordings are governed by the Classics Protection and
+      Access Act rather than the general term provisions.
+    schedule:
+      - published_through: 1922
+        term_years: 0
+        note: "Recordings first published 1922 or earlier entered the public domain on 1 January 2022."
+      - published_from: 1923
+        published_through: 1946
+        term_years: 100
+        note: "100 years from first publication."
+      - published_from: 1947
+        published_through: 1956
+        term_years: 110
+        note: "110 years from first publication."
+      - published_from: 1957
+        published_through: 1972
+        fixed_public_domain_year: 2068
+        note: >-
+          Recordings first published between 1957 and 14 February 1972 are
+          protected until 15 February 2067; they enter the public domain in 2068.
+    caveat: >-
+      A public-domain sound recording does not imply a public-domain musical
+      composition. The composition must be evaluated separately.
+
+  # ------------------------------------------------------------- India works
+  - rule_id: IN_LIFE_PLUS_60
+    jurisdiction: IN
+    applies_to_work_types: [MUSICAL_COMPOSITION, LITERARY_WORK, DRAMATIC_WORK, VISUAL_ARTWORK]
+    condition: "individual_author_known"
+    term_years: 60
+    anchor: author_death_year
+    required_facts: [author_death_year]
+    citation: "Copyright Act, 1957 (India), § 22"
+    description: >-
+      Literary, dramatic, musical and artistic works published within the
+      author's lifetime are protected for 60 years counted from the beginning of
+      the calendar year following the author's death.
+    caveat: null
+
+  - rule_id: IN_PUBLICATION_60
+    jurisdiction: IN
+    applies_to_work_types: [SOUND_RECORDING, FILM_AUDIOVISUAL]
+    condition: "publication_anchored"
+    term_years: 60
+    anchor: publication_year
+    required_facts: [publication_year]
+    citation: "Copyright Act, 1957 (India), §§ 26-27"
+    description: >-
+      Cinematograph films and sound recordings are protected for 60 years
+      counted from the beginning of the calendar year following publication.
+    caveat: null
+
+  - rule_id: IN_ANONYMOUS_60
+    jurisdiction: IN
+    applies_to_work_types: [MUSICAL_COMPOSITION, LITERARY_WORK, DRAMATIC_WORK, VISUAL_ARTWORK]
+    condition: "anonymous_pseudonymous_or_corporate"
+    term_years: 60
+    anchor: publication_year
+    required_facts: [publication_year]
+    citation: "Copyright Act, 1957 (India), § 23"
+    description: >-
+      Anonymous and pseudonymous works are protected for 60 years counted from
+      the beginning of the calendar year following first publication.
+    caveat: null
+
+  # -------------------------------------------------- Right of publicity
+  - rule_id: US_PUBLICITY_POSTMORTEM
+    jurisdiction: US
+    applies_to_work_types: [PERSONA]
+    required_facts: [is_person_living]
+    citation: "State law; e.g. Cal. Civ. Code § 3344.1; N.Y. Civ. Rights Law § 50-f"
+    description: >-
+      There is no federal right of publicity in the United States. The right and
+      its post-mortem duration are set by state law and turn on the individual's
+      domicile at death.
+    postmortem_terms:
+      CA: 70
+      NY: 40
+      IN_STATE_INDIANA: 100
+      TN: 10
+      TX: 50
+      default: null
+    caveat: >-
+      Post-mortem duration varies from zero to 100 years by state and depends on
+      domicile at death. Where domicile is unknown the outcome is
+      INSUFFICIENT_FACTS; confirm domicile before relying on any term.
+
+  - rule_id: IN_PUBLICITY_POSTMORTEM
+    jurisdiction: IN
+    applies_to_work_types: [PERSONA]
+    required_facts: [is_person_living]
+    citation: >-
+      Art. 21, Constitution of India; Deepa Jayakumar v. A.L. Vijay,
+      2021 SCC OnLine Mad 2712
+    description: >-
+      India recognises personality rights for living persons through privacy and
+      passing-off doctrine. Indian courts have held that personality rights are
+      not heritable and do not survive the death of the individual.
+    postmortem_terms:
+      default: 0
+    caveat: >-
+      Although personality rights lapse on death, the estate may still hold
+      registered trade marks or copyright in specific likenesses. Those are
+      separate rights and must be checked independently.
+
+  # ------------------------------------------------------------- Trade marks
+  - rule_id: TRADEMARK_NO_EXPIRY
+    jurisdiction: US
+    applies_to_work_types: [TRADEMARK]
+    required_facts: [trademark_status]
+    citation: "15 U.S.C. §§ 1058, 1059 (Lanham Act renewal provisions)"
+    description: >-
+      Trade mark rights do not expire on a fixed term. They subsist as long as
+      the mark is used in commerce and registrations are renewed, so no term
+      arithmetic applies. The clearance question is nominative fair use,
+      dilution, and disparagement exposure rather than duration.
+    caveat: >-
+      Duration is not the operative question for a trade mark. Assess whether
+      the on-screen use is nominative, whether it implies endorsement, and
+      whether the depiction is disparaging.
