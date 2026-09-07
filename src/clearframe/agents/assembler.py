@@ -29,6 +29,7 @@ from typing import Any, Optional
 from pydantic import BaseModel, Field
 
 from clearframe.audit.logger import AuditLogger
+from clearframe.tools.gemini_client import build_client, generate_with_retry
 from clearframe.config import Settings, get_settings
 from clearframe.models import (
     AuthorshipType,
@@ -208,7 +209,7 @@ EVIDENCE (cite these ids):
 
 
 def _build_client(settings: Settings):
-    """Construct a google-genai client for the configured auth path.
+    """Return a shared google-genai client with the configured timeout.
 
     Args:
         settings: Loaded settings.
@@ -216,17 +217,7 @@ def _build_client(settings: Settings):
     Returns:
         A configured ``google.genai.Client``.
     """
-    from google import genai
-
-    from clearframe.config import resolve_google_api_key
-
-    if settings.google_genai_use_vertexai:
-        return genai.Client(
-            vertexai=True,
-            project=settings.google_cloud_project,
-            location=settings.google_cloud_location,
-        )
-    return genai.Client(api_key=resolve_google_api_key(settings))
+    return build_client(settings)
 
 
 def render_evidence(evidence: list[Evidence], limit: int = 12) -> str:
@@ -346,7 +337,8 @@ async def extract_facts(
     )
     started = time.perf_counter()
     try:
-        response = await client.aio.models.generate_content(
+        response = await generate_with_retry(
+            client,
             model=settings.gemini_synthesis_model,
             contents=prompt,
             config=types.GenerateContentConfig(
@@ -356,6 +348,8 @@ async def extract_facts(
                 response_schema=_ExtractedFacts,
                 max_output_tokens=8000,
             ),
+            settings=settings,
+            label=f"facts:{item.mention_text}",
         )
     except Exception as exc:  # noqa: BLE001 - a failed extraction is a missing fact
         if audit:
@@ -500,22 +494,38 @@ def apply_rules(
 
 
 def forced_tier(item: ExtractedItem, outcomes: list[RuleOutcome]) -> Optional[Tier]:
-    """Return the tier that the facts compel, independent of the model.
+    """Return the tier the facts compel, independent of model judgment.
 
-    Some escalation triggers are structural and must not depend on model
-    judgment: a living person depicted, in-copyright music, a negative depiction
-    of a real entity, an on-screen active mark. Where one of these holds, the
-    tier is decided here and the model cannot lower it.
+    Some triggers are structural and must not depend on the model. Where one
+    fires, the tier is decided here and synthesis cannot lower it.
+
+    ESCALATE - genuine high exposure requiring counsel:
+        - a real entity is depicted negatively (disparagement, trade libel)
+        - a living person is depicted (subsisting right of publicity)
+        - either music right is in copyright
+        - a real commercial entity is depicted POSITIVELY on screen, which is
+          the shape a false-endorsement claim takes
+
+    NEEDS_VERIFICATION - a floor, not a ceiling:
+        - a rule returned INSUFFICIENT_FACTS
+        - a mark appears on screen in neutral, incidental use
+
+    Neutral on-screen brand use is deliberately NOT escalated. It is the most
+    common case in any screenplay, and escalating it buries the genuinely
+    exposed items: a review that flags three quarters of the script as needing
+    counsel has not triaged anything. It still cannot reach CLEAR_ON_RECORD
+    without a reviewer looking at it.
 
     Args:
         item: The item being assembled.
         outcomes: The deterministic rule outcomes.
 
     Returns:
-        The compelled tier, or None if the model may choose.
+        The compelled tier, or None if the model may choose freely.
     """
     codes = {o.outcome for o in outcomes}
 
+    # --- ESCALATE: real exposure ---------------------------------------
     if item.worst_depiction is DepictionNature.NEGATIVE:
         return Tier.ESCALATE
     if item.category is ItemCategory.REAL_PERSON and RuleOutcomeCode.RIGHT_SUBSISTS in codes:
@@ -523,12 +533,23 @@ def forced_tier(item: ExtractedItem, outcomes: list[RuleOutcome]) -> Optional[Ti
     if item.category is ItemCategory.MUSIC and RuleOutcomeCode.IN_COPYRIGHT in codes:
         return Tier.ESCALATE
     if (
+        item.category in _TRADEMARK_CATEGORIES
+        and item.appears_on_screen
+        and item.worst_depiction is DepictionNature.POSITIVE
+    ):
+        # Favourable on-screen treatment of a real brand is the fact pattern a
+        # false-endorsement claim is built on.
+        return Tier.ESCALATE
+
+    # --- NEEDS_VERIFICATION: a floor the model cannot go below -----------
+    if RuleOutcomeCode.INSUFFICIENT_FACTS in codes:
+        return Tier.NEEDS_VERIFICATION
+    if (
         item.category in {ItemCategory.BRAND_TRADEMARK, ItemCategory.LOGO_PROP}
         and item.appears_on_screen
     ):
-        return Tier.ESCALATE
-    if RuleOutcomeCode.INSUFFICIENT_FACTS in codes:
         return Tier.NEEDS_VERIFICATION
+
     return None
 
 
@@ -592,7 +613,8 @@ async def synthesize(
 
     started = time.perf_counter()
     try:
-        response = await client.aio.models.generate_content(
+        response = await generate_with_retry(
+            client,
             model=settings.gemini_synthesis_model,
             contents=prompt,
             config=types.GenerateContentConfig(
@@ -602,6 +624,8 @@ async def synthesize(
                 response_schema=_SynthesisOutput,
                 max_output_tokens=8000,
             ),
+            settings=settings,
+            label=f"synth:{item.mention_text}",
         )
     except Exception as exc:  # noqa: BLE001
         if audit:

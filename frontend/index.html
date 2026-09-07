@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ClearFrame — clearance research</title>
+<style>
+  :root{--bg:#0f1115;--panel:#171a21;--panel2:#1e222b;--line:#2a2f3a;--text:#e6e8ec;
+        --dim:#9aa3b2;--esc:#ff6b6b;--ver:#f5a524;--clr:#4ade80;--accent:#6ea8fe}
+  *{box-sizing:border-box}
+  body{margin:0;font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+       background:var(--bg);color:var(--text)}
+  header{padding:14px 20px;border-bottom:1px solid var(--line);display:flex;
+         align-items:center;gap:14px;flex-wrap:wrap}
+  h1{font-size:16px;margin:0;letter-spacing:.02em}
+  .disclaimer{font-size:12px;color:var(--dim);border-left:2px solid var(--ver);
+              padding-left:10px;margin-left:auto;max-width:520px}
+  main{display:grid;grid-template-columns:minmax(320px,400px) 1fr;gap:0;height:calc(100vh - 58px)}
+  #list{overflow:auto;border-right:1px solid var(--line)}
+  #detail{overflow:auto;padding:20px}
+  .bar{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  button{background:var(--panel2);color:var(--text);border:1px solid var(--line);
+         border-radius:6px;padding:6px 12px;cursor:pointer;font-size:13px}
+  button:hover:not(:disabled){border-color:var(--accent)}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  button.primary{background:var(--accent);color:#0b1020;border-color:var(--accent);font-weight:600}
+  .item{padding:11px 16px;border-bottom:1px solid var(--line);cursor:pointer}
+  .item:hover{background:var(--panel)}
+  .item.sel{background:var(--panel2);border-left:3px solid var(--accent);padding-left:13px}
+  .item .top{display:flex;gap:8px;align-items:center}
+  .name{font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .meta{font-size:12px;color:var(--dim);margin-top:3px}
+  .badge{font-size:10px;padding:2px 7px;border-radius:99px;font-weight:700;letter-spacing:.04em;white-space:nowrap}
+  .ESCALATE{background:rgba(255,107,107,.15);color:var(--esc);border:1px solid rgba(255,107,107,.35)}
+  .NEEDS_VERIFICATION{background:rgba(245,165,36,.15);color:var(--ver);border:1px solid rgba(245,165,36,.35)}
+  .CLEAR_ON_RECORD{background:rgba(74,222,128,.13);color:var(--clr);border:1px solid rgba(74,222,128,.32)}
+  .dec{font-size:10px;color:var(--dim);border:1px solid var(--line);border-radius:99px;padding:1px 6px}
+  .dec.done{color:var(--clr);border-color:rgba(74,222,128,.4)}
+  h2{font-size:19px;margin:0 0 4px}
+  h3{font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--dim);
+     margin:22px 0 8px;font-weight:600}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px;margin-bottom:9px}
+  .rule{border-left:3px solid var(--accent)}
+  a{color:var(--accent)}
+  cite{background:rgba(110,168,254,.14);border-radius:4px;padding:1px 5px;font-style:normal;
+       font-size:12px;font-family:ui-monospace,monospace}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--dim);font-weight:600;font-size:12px}
+  .trace{font-family:ui-monospace,monospace;font-size:11.5px}
+  .trace .WARNING{color:var(--ver)} .trace .ERROR{color:var(--esc)}
+  .muted{color:var(--dim)} .small{font-size:12px}
+  details summary{cursor:pointer;color:var(--dim);font-size:12px}
+  #gate{background:rgba(255,107,107,.09);border:1px solid rgba(255,107,107,.35);
+        border-radius:8px;padding:12px;margin-bottom:14px;display:none}
+  input[type=text]{background:var(--panel2);border:1px solid var(--line);color:var(--text);
+                   border-radius:6px;padding:6px 10px;width:100%;margin:8px 0}
+  .tabs{display:flex;gap:4px;margin-bottom:14px}
+  .tabs button.on{background:var(--accent);color:#0b1020;border-color:var(--accent)}
+</style>
+</head>
+<body>
+<header>
+  <h1>ClearFrame</h1>
+  <input type="file" id="file" accept=".pdf,.txt,.fountain" style="font-size:12px">
+  <button id="upload" class="primary">Upload &amp; run</button>
+  <span id="status" class="muted small"></span>
+  <div class="disclaimer" id="disclaimer">
+    Research output for review by qualified counsel. Not legal advice.
+    ClearFrame never marks an item as cleared.
+  </div>
+</header>
+
+<main>
+  <div id="list">
+    <div class="bar">
+      <span id="counts" class="small muted">No report loaded</span>
+      <button id="export" style="margin-left:auto">Export</button>
+    </div>
+    <div id="items"></div>
+  </div>
+
+  <div id="detail">
+    <div class="tabs">
+      <button id="tabItem" class="on">Finding</button>
+      <button id="tabTrace">Agent trace</button>
+    </div>
+    <div id="gate"></div>
+    <div id="pane"><p class="muted">Upload a screenplay, or open an existing report id via
+      <code>?report=rpt_…</code>, then select an item.</p></div>
+  </div>
+</main>
+
+<script>
+const API = location.origin;
+let report = null, selected = null, tab = "item";
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* Resolve inline [ev_…] / [RULE_ID] tokens to links. Both grouping styles occur. */
+function citations(text, finding) {
+  return esc(text).replace(/\[([^\]]+)\]/g, (whole, inner) => {
+    const parts = inner.split(/[,;]\s*/).map(id => {
+      const ev = report.evidence_store[id];
+      if (ev) return `<a href="${esc(ev.source_url)}" target="_blank" rel="noopener"
+                        title="${esc(ev.source_title)}">${esc(id)}</a>`;
+      const rule = (finding.rule_outcomes || []).find(r => r.rule_id === id);
+      if (rule) return `<cite title="${esc(rule.citation)}">${esc(id)}</cite>`;
+      return esc(id);
+    });
+    return `<cite>[${parts.join(", ")}]</cite>`;
+  });
+}
+
+function decisionOf(id) { return report.review_states?.[id]?.decision ?? "PENDING"; }
+
+function renderList() {
+  const c = report.tier_counts ?? {};
+  const pending = report.items.filter(i => decisionOf(i.item_id) === "PENDING").length;
+  $("#counts").textContent =
+    `${report.items.length} items · ${report.items.length - pending}/${report.items.length} reviewed`;
+
+  const byItem = Object.fromEntries(report.findings.map(f => [f.item_id, f]));
+  const ordered = report.findings.map(f => report.items.find(i => i.item_id === f.item_id)).filter(Boolean);
+
+  $("#items").innerHTML = ordered.map(it => {
+    const f = byItem[it.item_id], d = decisionOf(it.item_id);
+    return `<div class="item ${selected === it.item_id ? "sel" : ""}" data-id="${it.item_id}">
+      <div class="top">
+        <span class="name">${esc(it.mention_text)}</span>
+        <span class="badge ${f.tier}">${f.tier.replace(/_/g, " ")}</span>
+      </div>
+      <div class="meta">${esc(it.category.replace(/_/g, " ").toLowerCase())} ·
+        ${it.occurrences.length} occ · p.${it.occurrences.map(o => o.page_number).filter((v,i,a)=>a.indexOf(v)===i).join(", ")}
+        <span class="dec ${d !== "PENDING" ? "done" : ""}">${d}</span></div>
+    </div>`;
+  }).join("");
+
+  document.querySelectorAll(".item").forEach(el =>
+    el.onclick = () => { selected = el.dataset.id; tab = "item"; render(); });
+}
+
+function renderFinding() {
+  if (!selected) return `<p class="muted">Select an item.</p>`;
+  const it = report.items.find(i => i.item_id === selected);
+  const f = report.findings.find(x => x.item_id === selected);
+  const ev = Object.values(report.evidence_store).filter(e => e.item_id === selected);
+  const d = decisionOf(selected);
+
+  const claims = (f.claims?.length ? f.claims.map(c => citations(c.text, f)).join(" ")
+                                   : `<span class="muted">No citable rationale survived validation.</span>`);
+
+  return `
+   <h2>${esc(it.mention_text)}</h2>
+   <div class="meta">
+     <span class="badge ${f.tier}">${f.tier.replace(/_/g, " ")}</span>
+     &nbsp;${esc(it.category.replace(/_/g, " ").toLowerCase())}
+     ${it.normalized_name.toLowerCase() !== it.mention_text.toLowerCase()
+        ? ` · resolved: <b>${esc(it.normalized_name)}</b>` : ""}
+     ${it.variants?.length ? ` · also: ${it.variants.map(esc).join(", ")}` : ""}
+   </div>
+
+   <h3>Occurrences</h3>
+   <table><tr><th>Scene</th><th>Page</th><th>On screen</th><th>Depiction</th><th>Context</th></tr>
+   ${it.occurrences.map(o => `<tr><td>${o.scene_number}</td><td><b>${o.page_number}</b></td>
+     <td>${o.on_screen ? "yes" : "no"}</td><td>${o.depiction_nature.toLowerCase()}</td>
+     <td class="small">${esc(o.context_snippet)}</td></tr>`).join("")}</table>
+
+   <h3>Assessment</h3>
+   <div class="card">${claims}</div>
+
+   ${f.open_questions?.length ? `<h3>Open questions</h3><div class="card"><ol>
+      ${f.open_questions.map(q => `<li>${esc(q)}</li>`).join("")}</ol></div>` : ""}
+
+   <h3>Deterministic rule outcomes</h3>
+   ${(f.rule_outcomes || []).map(r => `<div class="card rule">
+      <b>${esc(r.rule_id)}</b> → <b>${esc(r.outcome)}</b>
+      ${r.public_domain_year ? ` · public domain from <b>${r.public_domain_year}</b>` : ""}
+      <div class="small" style="margin-top:6px">${esc(r.explanation)}</div>
+      ${r.missing_facts?.length ? `<div class="small" style="color:var(--ver);margin-top:6px">
+         Fact(s) not established: ${r.missing_facts.map(esc).join(", ")}</div>` : ""}
+      ${r.citation ? `<div class="small muted" style="margin-top:6px">${esc(r.citation)}</div>` : ""}
+    </div>`).join("") || `<p class="muted small">No term rule applies to this category.</p>`}
+
+   <h3>Sources (${ev.length})</h3>
+   ${ev.map(e => `<div class="card">
+      <a href="${esc(e.source_url)}" target="_blank" rel="noopener">${esc(e.source_title || e.source_url)}</a>
+      <div class="small muted">${esc(e.evidence_id)} · retrieved ${esc(e.retrieved_at.slice(0,10))}</div>
+      <div class="small" style="margin-top:6px">${esc(e.snippet.slice(0,320))}</div>
+    </div>`).join("") || `<div class="card" style="border-color:var(--esc)">
+      No sources retrieved. This item has not been researched.</div>`}
+
+   ${f.dropped_claims?.length ? `<details style="margin-top:12px"><summary>
+      ${f.dropped_claims.length} claim(s) removed in validation</summary>
+      <div class="card small muted">${f.dropped_claims.map(esc).join("<br>")}</div></details>` : ""}
+
+   <h3>Reviewer decision — currently ${d}</h3>
+   <input type="text" id="note" placeholder="Reviewer note (optional)"
+          value="${esc(report.review_states?.[selected]?.reviewer_note || "")}">
+   <div style="display:flex;gap:8px">
+     <button onclick="decide('CONFIRMED')">Confirm</button>
+     <button onclick="decide('REJECTED')">Reject</button>
+     <button onclick="decide('ESCALATED')">Escalate</button>
+     <button onclick="decide('PENDING')" class="muted">Reset</button>
+   </div>`;
+}
+
+function renderTrace() {
+  const e = report.__trace?.entries || [];
+  const t = report.__trace?.totals || {};
+  return `<h3>Agent trace — ${e.length} steps</h3>
+    <div class="card small">${Object.entries(t).map(([k,v]) =>
+      `${esc(k)}: <b>${esc(v)}</b>`).join(" · ")}</div>
+    <table class="trace"><tr><th>Stage</th><th>Tool</th><th>ms</th><th>Result</th></tr>
+    ${e.map(x => `<tr class="${x.level}"><td>${esc(x.stage)}</td><td>${esc(x.tool)}</td>
+      <td>${x.latency_ms ? Math.round(x.latency_ms) : "—"}</td>
+      <td>${esc(x.output_summary)}${x.detail?.safety_blocked
+        ? ` <b style="color:var(--esc)">SAFETY BLOCKED — span not analysed</b>` : ""}</td></tr>`).join("")}
+    </table>`;
+}
+
+function render() {
+  if (!report) return;
+  renderList();
+  $("#pane").innerHTML = tab === "trace" ? renderTrace() : renderFinding();
+  $("#tabItem").className = tab === "item" ? "on" : "";
+  $("#tabTrace").className = tab === "trace" ? "on" : "";
+}
+
+async function decide(decision) {
+  const note = $("#note")?.value || "";
+  await fetch(`${API}/api/reports/${report.report_id}/items/${selected}`, {
+    method: "PATCH", headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({decision, reviewer_note: note})
+  });
+  await load(report.report_id);
+}
+
+async function load(id) {
+  report = await (await fetch(`${API}/api/reports/${id}`)).json();
+  report.tier_counts = report.findings.reduce((a,f) => (a[f.tier]=(a[f.tier]||0)+1, a), {});
+  try { report.__trace = await (await fetch(`${API}/api/reports/${id}/trace`)).json(); } catch {}
+  $("#gate").style.display = "none";
+  render();
+}
+
+$("#upload").onclick = async () => {
+  const f = $("#file").files[0];
+  if (!f) return alert("Choose a .pdf, .txt or .fountain screenplay first.");
+  const body = new FormData(); body.append("file", f);
+  $("#status").textContent = "uploading…";
+  const res = await fetch(`${API}/api/scripts`, {method:"POST", body});
+  if (!res.ok) { $("#status").textContent = `error: ${(await res.json()).detail}`; return; }
+  const {report_id} = await res.json();
+  history.replaceState(null, "", `?report=${report_id}`);
+  const poll = setInterval(async () => {
+    await load(report_id);
+    $("#status").textContent = `${report.pipeline_state}…`;
+    if (["COMPLETE","FAILED"].includes(report.pipeline_state)) {
+      clearInterval(poll);
+      $("#status").textContent = report.pipeline_state === "FAILED" ? `failed: ${report.error}` : "complete";
+    }
+  }, 3000);
+};
+
+/* The 409 is a hard backend rule, so this handles it rather than pre-disabling. */
+$("#export").onclick = async () => {
+  const res = await fetch(`${API}/api/reports/${report.report_id}/export`, {method:"POST"});
+  if (res.status === 409) {
+    const b = await res.json();
+    $("#gate").style.display = "block";
+    $("#gate").innerHTML = `<b>Export blocked — ${b.pending_count} of ${b.total_items} items unreviewed.</b>
+      <div class="small" style="margin-top:6px">${esc(b.detail)}</div>
+      <div class="small" style="margin-top:8px">${b.pending_items.map(p =>
+        `<a href="#" onclick="selected='${p.item_id}';tab='item';render();return false">
+          ${esc(p.mention_text)}</a> <span class="muted">(p.${p.pages.join(", ")})</span>`).join(" · ")}</div>`;
+    return;
+  }
+  const b = await res.json();
+  const url = URL.createObjectURL(new Blob([b.markdown], {type:"text/markdown"}));
+  Object.assign(document.createElement("a"), {href:url, download:b.filename}).click();
+  $("#gate").style.display = "none";
+};
+
+$("#tabItem").onclick = () => { tab = "item"; render(); };
+$("#tabTrace").onclick = () => { tab = "trace"; render(); };
+
+fetch(`${API}/`).then(r => r.json()).then(d => $("#disclaimer").textContent = d.disclaimer).catch(()=>{});
+const pre = new URLSearchParams(location.search).get("report");
+if (pre) load(pre);
+</script>
+</body>
+</html>

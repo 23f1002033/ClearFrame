@@ -23,6 +23,7 @@ from typing import Iterable, Optional
 from pydantic import BaseModel, Field
 
 from clearframe.audit.logger import AuditLogger
+from clearframe.tools.gemini_client import build_client, generate_with_retry
 from clearframe.config import Settings, get_settings
 from clearframe.models import (
     DepictionNature,
@@ -265,7 +266,7 @@ def canonical_key(normalized_name: str, mention_text: str = "") -> str:
 
 
 def _build_client(settings: Settings):
-    """Construct a google-genai client for the configured auth path.
+    """Return a shared google-genai client with the configured timeout.
 
     Args:
         settings: Loaded settings.
@@ -273,17 +274,7 @@ def _build_client(settings: Settings):
     Returns:
         A configured ``google.genai.Client``.
     """
-    from google import genai
-
-    from clearframe.config import resolve_google_api_key
-
-    if settings.google_genai_use_vertexai:
-        return genai.Client(
-            vertexai=True,
-            project=settings.google_cloud_project,
-            location=settings.google_cloud_location,
-        )
-    return genai.Client(api_key=resolve_google_api_key(settings))
+    return build_client(settings)
 
 
 def _chunk_config(settings: Settings):
@@ -396,10 +387,13 @@ async def extract_chunk_async(
     async with guard:
         started = time.perf_counter()
         try:
-            response = await client.aio.models.generate_content(
+            response = await generate_with_retry(
+                client,
                 model=settings.gemini_extraction_model,
                 contents=prompt,
                 config=_chunk_config(settings),
+                settings=settings,
+                label=scope,
             )
         except Exception as exc:  # noqa: BLE001 - one bad chunk must not lose the run
             if audit:

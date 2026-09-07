@@ -174,13 +174,46 @@ def test_in_copyright_music_forces_escalate() -> None:
     assert forced_tier(item, outcomes) is Tier.ESCALATE
 
 
-def test_on_screen_trademark_forces_escalate() -> None:
-    """A mark shown on screen is materially different from one merely spoken."""
-    on = _item(ItemCategory.BRAND_TRADEMARK, on_screen=True)
-    off = _item(ItemCategory.BRAND_TRADEMARK, on_screen=False)
-    outcomes = [_outcome(RuleOutcomeCode.NOT_APPLICABLE)]
-    assert forced_tier(on, outcomes) is Tier.ESCALATE
-    assert forced_tier(off, outcomes) is not Tier.ESCALATE
+def test_neutral_on_screen_trademark_is_verification_not_escalation() -> None:
+    """Neutral incidental brand use is the common case and must not escalate.
+
+    Escalating every on-screen mark buries the genuinely exposed items: a review
+    that flags three quarters of a script as needing counsel has triaged nothing.
+    """
+    item = _item(ItemCategory.BRAND_TRADEMARK, on_screen=True, depiction=DepictionNature.NEUTRAL)
+    assert forced_tier(item, [_outcome(RuleOutcomeCode.NOT_APPLICABLE)]) is Tier.NEEDS_VERIFICATION
+
+
+def test_neutral_on_screen_trademark_cannot_reach_clear_on_record() -> None:
+    """The floor still holds: a human must look at an on-screen mark."""
+    item = _item(ItemCategory.BRAND_TRADEMARK, on_screen=True)
+    assert forced_tier(item, [_outcome(RuleOutcomeCode.NOT_APPLICABLE)]) is not None
+
+
+def test_positive_on_screen_depiction_forces_escalate() -> None:
+    """Favourable treatment of a real brand is the false-endorsement pattern."""
+    item = _item(ItemCategory.BRAND_TRADEMARK, on_screen=True, depiction=DepictionNature.POSITIVE)
+    assert forced_tier(item, [_outcome(RuleOutcomeCode.NOT_APPLICABLE)]) is Tier.ESCALATE
+
+
+def test_positive_depiction_off_screen_does_not_escalate_on_that_basis() -> None:
+    """Endorsement risk turns on being shown, not merely mentioned warmly."""
+    item = _item(ItemCategory.BRAND_TRADEMARK, on_screen=False, depiction=DepictionNature.POSITIVE)
+    assert forced_tier(item, [_outcome(RuleOutcomeCode.NOT_APPLICABLE)]) is None
+
+
+def test_positive_on_screen_location_also_escalates() -> None:
+    """Endorsement exposure applies to any real commercial entity, not just brands."""
+    item = _item(
+        ItemCategory.REAL_LOCATION_BUSINESS, on_screen=True, depiction=DepictionNature.POSITIVE
+    )
+    assert forced_tier(item, [_outcome(RuleOutcomeCode.NOT_APPLICABLE)]) is Tier.ESCALATE
+
+
+def test_negative_depiction_still_escalates_regardless_of_screen_presence() -> None:
+    """Disparagement is exposure whether or not the entity is shown."""
+    item = _item(ItemCategory.BRAND_TRADEMARK, on_screen=False, depiction=DepictionNature.NEGATIVE)
+    assert forced_tier(item, [_outcome(RuleOutcomeCode.NOT_APPLICABLE)]) is Tier.ESCALATE
 
 
 def test_insufficient_facts_forces_needs_verification() -> None:
