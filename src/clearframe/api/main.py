@@ -13,9 +13,15 @@ from __future__ import annotations
 import asyncio
 import logging
 import shutil
+import sys
 import tempfile
 from pathlib import Path
 from typing import Any, Optional
+
+# Ensure 'src' directory is in sys.path when invoked as src.clearframe.api.main:app
+_src_dir = str(Path(__file__).resolve().parents[2])
+if _src_dir not in sys.path:
+    sys.path.insert(0, _src_dir)
 
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Response, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
