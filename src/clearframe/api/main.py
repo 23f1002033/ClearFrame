@@ -1,5 +1,15 @@
 """FastAPI application exposing the ClearFrame pipeline.
 
+Run it with, and only with::
+
+    PYTHONPATH=src uvicorn clearframe.api.main:app --port 8080
+
+Importing this module as ``src.clearframe.api.main`` also works if ``src`` is on
+the path, but it must not be done: Python would then hold two distinct copies of
+every ``clearframe`` module, and because ``get_settings()`` is LRU-cached each
+copy would carry its own settings and its own report store. The Dockerfile and
+the README both use the form above.
+
 The review gate is the load-bearing rule here. ``POST /api/reports/{id}/export``
 returns **409 Conflict** while any item is still ``PENDING``. That is enforced in
 the backend, not by disabling a button in the UI: a clearance log that leaves the
@@ -13,15 +23,9 @@ from __future__ import annotations
 import asyncio
 import logging
 import shutil
-import sys
 import tempfile
 from pathlib import Path
 from typing import Any, Optional
-
-# Ensure 'src' directory is in sys.path when invoked as src.clearframe.api.main:app
-_src_dir = str(Path(__file__).resolve().parents[2])
-if _src_dir not in sys.path:
-    sys.path.insert(0, _src_dir)
 
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Response, UploadFile
 from fastapi.middleware.cors import CORSMiddleware

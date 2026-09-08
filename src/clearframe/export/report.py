@@ -13,6 +13,7 @@ human to send, not correspondence the system transmits, and they say so.
 
 from __future__ import annotations
 
+import re
 from datetime import datetime
 from typing import Optional
 
@@ -129,6 +130,33 @@ def _rule_block(outcomes: list[RuleOutcome]) -> str:
     return "\n\n".join(blocks)
 
 
+_MD_IMAGE_RE = re.compile(r"!\[([^\]]*)\]\([^)]*\)")
+_MD_LINK_RE = re.compile(r"\[([^\]]*)\]\(([^)]*)\)")
+
+
+def _quote_snippet(snippet: str) -> str:
+    """Flatten a scraped snippet so it reads as a quotation, not as markup.
+
+    Evidence snippets are verbatim excerpts of scraped pages, and they arrive
+    containing markdown. Embedded inside the log's blockquotes that syntax
+    renders live: image links became empty ``[]`` links and page chrome ("Start
+    Free Trial", "Talk With Sales") became clickable links that appear to be
+    ClearFrame's own. The excerpt's words are the evidence, so link syntax is
+    reduced to its text and images are dropped.
+
+    Args:
+        snippet: The raw snippet from the source page.
+
+    Returns:
+        A single-line, markdown-inert version of the snippet.
+    """
+    text = _MD_IMAGE_RE.sub(r"\1", snippet)
+    text = _MD_LINK_RE.sub(r"\1", text)
+    text = text.replace("\n", " ").replace("|", "\\|")
+    text = re.sub(r"[*_`>#]", "", text)
+    return re.sub(r"\s{2,}", " ", text).strip()
+
+
 def _evidence_block(evidence: list[Evidence]) -> str:
     """Render an item's evidence with URLs and retrieval dates.
 
@@ -149,7 +177,7 @@ def _evidence_block(evidence: list[Evidence]) -> str:
             f"- `{item.evidence_id}` — [{item.source_title or item.source_url}]"
             f"({item.source_url})  \n"
             f"  Retrieved {_fmt_date(item.retrieved_at)}. {item.relevance_note}  \n"
-            f"  > {item.snippet.strip()[:400].replace(chr(10), ' ')}"
+            f"  > {_quote_snippet(item.snippet)[:400]}"
         )
     return "\n".join(lines)
 

@@ -134,20 +134,20 @@ Python and the model **cannot lower them**.
 
 ## Benchmark
 
-15 items scored against a golden set spanning all tiers and categories, each
+19 items scored against a golden set spanning all tiers and all seven categories, each
 verified by **independent** fresh web research — the pipeline's own stored
 Parallel evidence was deliberately not re-read, so a source it never retrieved
 can contradict it. Two did.
 
 | Metric | Result | |
 |:---|---:|:---|
-| Extraction recall | **100.0%** | 14/14 golden items extracted |
-| Extraction precision | **93.3%** | 1 known false positive |
-| Evidence coverage | **100.0%** | 14/14 items with ≥1 sourced citation |
-| Evidence-citation accuracy | **100.0%** | 14/14 findings where every claim resolves |
+| Extraction recall | **100.0%** | 18/18 golden items extracted |
+| Extraction precision | **94.7%** | 1 known false positive |
+| Evidence coverage | **100.0%** | 18/18 items with ≥1 sourced citation |
+| Evidence-citation accuracy | **100.0%** | 18/18 findings where every claim resolves |
 | Rules-engine accuracy | **100.0%** | 3/3 term calculations match verified year |
 
-Verdicts: **12 MATCH · 1 PARTIAL · 2 MISMATCH**.
+Verdicts across all 19 entries: **16 MATCH · 1 PARTIAL · 2 MISMATCH**.
 
 The failures are the interesting part:
 
@@ -176,9 +176,12 @@ that was the achievable standard. Every source URL is recorded in
 `data/golden_set.json` so any entry can be re-checked by hand, and the two
 mismatches were found and written down rather than smoothed over.
 
-Four `LOGO_PROP` entries are ground-truth-verified but marked `PENDING` — the
-benchmark refuses to score an entry the pipeline hasn't run, rather than
-counting it as a pass.
+All four `LOGO_PROP` entries now score `MATCH`: the pipeline independently
+identified Capitol Records, LLC, Federal Express Corporation, Apple Inc. and
+Starbucks Corporation as the registrants, matching the ground truth established
+before the run. The Apple finding additionally surfaced that company's published
+product-placement guidelines. The benchmark still refuses to score an entry the
+pipeline hasn't run, rather than counting it as a pass.
 
 ---
 

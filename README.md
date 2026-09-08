@@ -149,9 +149,19 @@ pytest                                   # 318 tests, no API keys needed
 
 ### Run the API
 
+**This is the only supported invocation.** The Dockerfile uses the same form.
+
 ```bash
 PYTHONPATH=src uvicorn clearframe.api.main:app --port 8080 --reload
 ```
+
+> Do not run it as `uvicorn src.clearframe.api.main:app`. That puts `src` on the
+> path as a package root, so Python ends up holding two distinct copies of every
+> `clearframe` module — `clearframe.config` and `src.clearframe.config`. Because
+> `get_settings()` is LRU-cached, each copy carries its own settings and its own
+> in-memory report store, so a report created through one is invisible to the
+> other. A `sys.path` shim to make that form work was removed for this reason;
+> please fix the command rather than re-adding the shim.
 
 - API docs: <http://localhost:8080/docs>
 - Reference UI: <http://localhost:8080/ui>
@@ -182,20 +192,20 @@ python scripts/run_benchmark.py --json     # machine-readable
 
 ## Benchmark
 
-15 items scored against [`data/golden_set.json`](data/golden_set.json), each
+19 items scored against [`data/golden_set.json`](data/golden_set.json), each
 verified by **independent** fresh web research. The pipeline's own stored
 Parallel evidence was deliberately not re-read, so a source it never retrieved
 can contradict it — and two did.
 
 | Metric | Result | |
 |:---|---:|:---|
-| Extraction recall | **100.0%** | 14/14 golden items extracted |
-| Extraction precision | **93.3%** | 1 known false positive |
-| Evidence coverage | **100.0%** | 14/14 items with ≥1 sourced citation |
-| Evidence-citation accuracy | **100.0%** | 14/14 findings where every claim resolves |
+| Extraction recall | **100.0%** | 18/18 golden items extracted |
+| Extraction precision | **94.7%** | 1 known false positive |
+| Evidence coverage | **100.0%** | 18/18 items with ≥1 sourced citation |
+| Evidence-citation accuracy | **100.0%** | 18/18 findings where every claim resolves |
 | Rules-engine accuracy | **100.0%** | 3/3 term calculations match verified year |
 
-12 MATCH · 1 PARTIAL · 2 MISMATCH. The failures are documented in the golden set
+**16 MATCH · 1 PARTIAL · 2 MISMATCH**, all 19 entries scored. The failures are documented in the golden set
 with sources; see [`docs/devpost-writeup.md`](docs/devpost-writeup.md).
 
 The golden set was verified via independent AI-assisted web research, not full

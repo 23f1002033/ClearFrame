@@ -3,7 +3,7 @@
  * Provides pub/sub subscriptions for UI components.
  */
 
-import { MOCK_REPORT, MOCK_TRACE } from "./mock_data.js";
+import { MOCK_REPORT, MOCK_REPORTS, MOCK_TRACE } from "./mock_data.js";
 import { api } from "./api.js";
 
 class Store {
@@ -117,20 +117,10 @@ class Store {
 
   async refreshReports() {
     if (this.state.demoMode) {
-      this.setState({
-        reports: [
-          {
-            report_id: MOCK_REPORT.report_id,
-            script_name: MOCK_REPORT.script_name,
-            pipeline_state: MOCK_REPORT.pipeline_state,
-            status: MOCK_REPORT.status,
-            items: MOCK_REPORT.items.length,
-            tier_counts: { ESCALATE: 2, NEEDS_VERIFICATION: 4, CLEAR_ON_RECORD: 2 },
-            pending: 5,
-            created_at: MOCK_REPORT.created_at
-          }
-        ]
-      });
+      // Derived from the fixture, never hardcoded: literal counts here drifted
+      // from the fixture and the dashboard advertised 8 tiered items for a
+      // 27-item report.
+      this.setState({ reports: MOCK_REPORTS });
       return;
     }
 
@@ -142,8 +132,23 @@ class Store {
     }
   }
 
+  /**
+   * True only for the bundled offline demo report.
+   *
+   * Demo mode must never be inferred from a report id matching the fixture's,
+   * because the fixture is generated from a real pipeline run and therefore
+   * carries a real-looking id. When those collided, loadReport() served the
+   * stale mock instead of the live report: decisions appeared to save but no
+   * PATCH was ever sent, and export never reached the backend's 409 gate.
+   * The fixture now uses a reserved "rpt_demo_" prefix that the pipeline
+   * cannot produce.
+   */
+  isDemoReportId(reportId) {
+    return typeof reportId === "string" && reportId.startsWith("rpt_demo_");
+  }
+
   async loadReport(reportId) {
-    if (this.state.demoMode || reportId === MOCK_REPORT.report_id) {
+    if (this.state.demoMode || this.isDemoReportId(reportId)) {
       // Use cloned mock report
       const cloned = JSON.parse(JSON.stringify(MOCK_REPORT));
       const firstItemId = cloned.findings[0]?.item_id || cloned.items[0]?.item_id;
@@ -289,21 +294,39 @@ class Store {
     }
   }
 
+  /**
+   * Ids of the rows the workspace is currently showing, in display order.
+   *
+   * Read from the DOM so keyboard navigation always follows what the reviewer
+   * can see. Walking `findings` instead moved the selection to rows hidden by
+   * the active search or tier filter, which looked like the selection vanishing.
+   */
+  visibleItemIds() {
+    const rows = document.querySelectorAll(".item-row");
+    if (rows.length) return [...rows].map(r => r.dataset.id);
+    // Fall back to findings order when the list is not mounted (e.g. trace view).
+    return this.state.currentReport ? this.state.currentReport.findings.map(f => f.item_id) : [];
+  }
+
   // Keyboard navigation
   selectNextItem() {
     if (!this.state.currentReport) return;
-    const items = this.state.currentReport.findings.map(f => f.item_id);
+    const items = this.visibleItemIds();
     const currentIndex = items.indexOf(this.state.selectedItemId);
-    if (currentIndex < items.length - 1) {
+    if (currentIndex === -1 && items.length) {
+      this.selectItem(items[0]);
+    } else if (currentIndex < items.length - 1) {
       this.selectItem(items[currentIndex + 1]);
     }
   }
 
   selectPrevItem() {
     if (!this.state.currentReport) return;
-    const items = this.state.currentReport.findings.map(f => f.item_id);
+    const items = this.visibleItemIds();
     const currentIndex = items.indexOf(this.state.selectedItemId);
-    if (currentIndex > 0) {
+    if (currentIndex === -1 && items.length) {
+      this.selectItem(items[0]);
+    } else if (currentIndex > 0) {
       this.selectItem(items[currentIndex - 1]);
     }
   }

@@ -278,3 +278,51 @@ def test_summary_text_states_pending_count_and_disclaimer() -> None:
     summary = render_summary_text(_report())
     assert "1 item(s) still pending" in summary
     assert "Not legal advice" in summary
+
+
+# ---------------------------------------------------------------------------
+# Scraped snippets must not render as live markup
+# ---------------------------------------------------------------------------
+
+
+def test_markdown_in_a_scraped_snippet_is_neutralised() -> None:
+    """Snippets are verbatim scrapes and arrive full of markdown.
+
+    Left as-is inside the log's blockquotes, image links rendered as empty `[]`
+    links and page chrome became clickable links that look like ClearFrame's own.
+    """
+    from clearframe.export.report import _quote_snippet
+
+    raw = (
+        "See [Bye Bye Blackbird (disambiguation)](https://en.wikipedia.org/wiki/X) "
+        "![](https://en.wikipedia.org/wiki/File:Blackbird_1926.png) "
+        "[Start Free Trial](https://vendor.example/trial)"
+    )
+    out = _quote_snippet(raw)
+    assert "](" not in out
+    assert "[]" not in out
+    assert "https://" not in out
+    assert "Bye Bye Blackbird (disambiguation)" in out
+    assert "Start Free Trial" in out
+
+
+def test_snippet_pipes_are_escaped_so_tables_do_not_break() -> None:
+    """A raw pipe inside a table cell would split the occurrence row."""
+    from clearframe.export.report import _quote_snippet
+
+    assert "\\|" in _quote_snippet('|"Bye Bye Blackbird" | | --- |')
+
+
+def test_snippet_is_collapsed_to_one_line() -> None:
+    """Multi-line snippets would break out of the blockquote."""
+    from clearframe.export.report import _quote_snippet
+
+    assert "\n" not in _quote_snippet("line one\nline two\n\nline three")
+
+
+def test_export_contains_no_empty_markdown_links() -> None:
+    """Regression: the exported log carried `[](https://...)` from scraped pages."""
+    report = _report()
+    evidence = next(iter(report.evidence_store.values()))
+    evidence.snippet = "prefix [](https://en.wikipedia.org/wiki/File:X.png) suffix"
+    assert "[]" not in render_markdown(report)

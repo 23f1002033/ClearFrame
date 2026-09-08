@@ -9,6 +9,36 @@ two ever disagree.
 
 ---
 
+## Running the backend locally
+
+**One supported command.** Run it from the repository root:
+
+```bash
+PYTHONPATH=src uvicorn clearframe.api.main:app --port 8080 --reload
+```
+
+Then the API is at `http://localhost:8080`, interactive docs at `/docs`, and the
+bundled reference UI at `/ui`.
+
+> **Not** `uvicorn src.clearframe.api.main:app`. That form loads every
+> `clearframe` module twice under two different names, and since settings are
+> LRU-cached, each copy gets its own configuration and its own in-memory report
+> store — so a script you upload may appear to vanish. The Dockerfile uses the
+> command above; please match it.
+
+Check it came up with both integrations configured:
+
+```bash
+curl -s localhost:8080/api/health
+# {"status":"ok","gemini_configured":true,"parallel_configured":true,...}
+```
+
+If either flag is `false`, the pipeline will still accept uploads but produce a
+degraded report. The server logs a credential preflight at the start of the
+research stage showing each key's length and origin (never its value).
+
+---
+
 ## Positioning constraints the UI must honour
 
 These are product requirements, not styling suggestions. The backend enforces

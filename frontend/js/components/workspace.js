@@ -4,6 +4,10 @@
  */
 import { store } from "../store.js";
 
+// Survives the re-render that setState triggers, so a focused text field keeps
+// focus and caret position across it.
+let pendingFocus = null;
+
 export function renderWorkspace(container) {
   const { currentReport, selectedItemId, searchQuery, tierFilter, categoryFilter, decisionFilter } = store.state;
 
@@ -64,13 +68,38 @@ export function renderWorkspace(container) {
   const pendingCount = store.getPendingCount();
   const totalCount = currentReport.items.length;
   const reviewedCount = totalCount - pendingCount;
-  const isAllDecided = pendingCount === 0;
+
+  // A failed run, or a finished run that yielded nothing from a script that did
+  // parse, is not a clean script - it is a broken review. Rendering it as
+  // "0 items - 0/0 decided" invites a producer to read an empty list as "nothing
+  // here needs clearing", which is the worst false negative this product can
+  // produce. It also made `isAllDecided` true, so the export button lit up green
+  // for a report the backend would (correctly) refuse with 425.
+  const pipelineFailed = currentReport.pipeline_state === "FAILED";
+  const emptyButParsed =
+    currentReport.pipeline_state === "COMPLETE" &&
+    totalCount === 0 &&
+    (currentReport.scene_count || 0) > 0;
+  const runUnusable = pipelineFailed || emptyButParsed;
+  const isAllDecided = pendingCount === 0 && totalCount > 0 && !runUnusable;
 
   const occurrences = selectedItem?.occurrences || [];
   const evidenceList = selectedItem
     ? Object.values(currentReport.evidence_store).filter(e => e.item_id === selectedItem.item_id)
     : [];
   const ruleOutcomes = selectedFinding?.rule_outcomes || [];
+
+  // A music item carries two independent rights (composition and sound
+  // recording) that must be shown side by side and never collapsed. The section
+  // used to trigger on `category === "MUSIC" || ruleOutcomes.length >= 2`, while
+  // section 4 tested only the category — so a non-music item with two outcomes
+  // was labelled "Music Dual-Rights Analysis" and rendered twice. These two
+  // flags are complementary by construction.
+  const isDualRights = ruleOutcomes.length >= 2;
+  const dualRightsHeading =
+    selectedItem?.category === "MUSIC"
+      ? "Music Dual-Rights Analysis (Independent Evaluation)"
+      : "Independent Rights Analysis (Evaluated Separately)";
   const currentDecision = selectedItem ? store.getItemDecision(selectedItem.item_id) : "PENDING";
   const currentNote = selectedItem ? (currentReport.review_states?.[selectedItem.item_id]?.reviewer_note || "") : "";
 
@@ -117,11 +146,19 @@ export function renderWorkspace(container) {
             <div>
               <h2 class="text-base font-bold text-white tracking-tight">${currentReport.script_name}</h2>
               <div class="text-sm text-gray-400 mt-1">
-                ${totalCount} items · <b class="${isAllDecided ? "text-emerald-400" : "text-amber-400"}">${reviewedCount}/${totalCount} decided</b>
+                ${
+                  runUnusable
+                    ? `<b class="text-red-400">Pipeline ${escapeHtml(currentReport.pipeline_state)} — review incomplete</b>`
+                    : `${totalCount} items · <b class="${isAllDecided ? "text-emerald-400" : "text-amber-400"}">${reviewedCount}/${totalCount} decided</b>`
+                }
               </div>
             </div>
-            <button id="wsBtnExport" class="px-4 py-2 rounded-xl ${
-              isAllDecided
+            <button id="wsBtnExport" ${runUnusable ? "disabled" : ""} title="${
+              runUnusable ? "Export unavailable: the pipeline did not complete" : "Export the clearance log"
+            }" class="px-4 py-2 rounded-xl ${
+              runUnusable
+                ? "bg-gray-800 text-gray-500 border border-gray-700 cursor-not-allowed font-medium"
+                : isAllDecided
                 ? "bg-emerald-600 hover:bg-emerald-500 shadow-md shadow-emerald-600/25 text-white font-semibold"
                 : "bg-gray-700 hover:bg-gray-600 text-gray-200 border border-gray-600 font-medium"
             } text-sm flex items-center gap-2 transition-all">
@@ -158,7 +195,11 @@ export function renderWorkspace(container) {
         <div class="flex-1 overflow-y-auto divide-y divide-gray-700/40" id="itemList">
           ${
             filteredItems.length === 0
-              ? `<div class="p-8 text-center text-sm text-gray-500">No items match the current filters.</div>`
+              ? `<div class="p-8 text-center text-sm ${runUnusable ? "text-red-300" : "text-gray-500"}">${
+                  runUnusable
+                    ? "No items were extracted because the pipeline did not complete. This is not a clean script."
+                    : "No items match the current filters."
+                }</div>`
               : filteredItems
                   .map(item => {
                     const finding = currentReport.findings.find(f => f.item_id === item.item_id);
@@ -211,7 +252,45 @@ export function renderWorkspace(container) {
       <!-- Right Pane: Deep Review Inspector -->
       <div class="flex-1 flex flex-col overflow-hidden bg-gray-900">
         ${
-          !selectedItem
+          runUnusable
+            ? `
+          <div class="h-full flex items-center justify-center p-10">
+            <div class="max-w-2xl">
+              <div class="rounded-2xl border border-red-500/40 bg-red-950/25 p-8">
+                <div class="flex items-center gap-4 mb-5">
+                  <div class="w-12 h-12 rounded-xl bg-red-500/15 text-red-300 border border-red-500/30 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                  </div>
+                  <div>
+                    <h2 class="text-xl font-bold text-white tracking-tight">Pipeline did not complete</h2>
+                    <div class="text-sm text-red-300 font-medium">This is not a clean script. It is an incomplete review.</div>
+                  </div>
+                </div>
+                <p class="text-sm text-gray-200 leading-relaxed mb-5">
+                  ${escapeHtml(
+                    currentReport.error ||
+                      "The run produced no items from a screenplay that parsed successfully. Nothing here has been researched."
+                  )}
+                </p>
+                <div class="text-sm text-gray-300 bg-gray-900/60 border border-gray-700/60 rounded-xl p-4 mb-6">
+                  <b class="text-white">Do not treat this as a clearance result.</b>
+                  ${currentReport.scene_count || 0} scene(s) were parsed and
+                  ${totalCount} item(s) extracted, so any brand, song, person or
+                  location in this screenplay remains unreviewed.
+                </div>
+                <div class="flex items-center gap-3">
+                  <button id="wsViewTrace" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold">
+                    Inspect agent trace
+                  </button>
+                  <button id="wsGoDashboardFail" class="px-4 py-2 rounded-xl bg-gray-700 hover:bg-gray-600 text-gray-200 text-sm font-medium border border-gray-600">
+                    Back to dashboard
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `
+            : !selectedItem
             ? `
           <div class="h-full flex items-center justify-center text-gray-500 text-base">
             Select an item from the matrix to inspect clearance research.
@@ -370,21 +449,21 @@ export function renderWorkspace(container) {
               </div>
             </div>
 
-            <!-- 3. Music Dual-Rights Comparison (if Music) -->
+            <!-- 3. Side-by-side comparison when an item carries two rights -->
             ${
-              selectedItem.category === "MUSIC" || ruleOutcomes.length >= 2
+              isDualRights
                 ? `
               <div class="inspector-section">
                 <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
                   <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path></svg>
-                  Music Dual-Rights Analysis (Independent Evaluation)
+                  ${dualRightsHeading}
                 </h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                   ${ruleOutcomes
                     .map(r => {
                       const isPD = r.outcome === "PUBLIC_DOMAIN";
                       return `
-                    <div class="p-5 rounded-xl border ${
+                    <div id="rule-${r.rule_id}" class="p-5 rounded-xl border scroll-mt-6 ${
                       isPD ? "border-emerald-500/25 bg-emerald-950/15" : "border-red-500/25 bg-red-950/15"
                     }">
                       <div class="flex items-center justify-between mb-3">
@@ -410,7 +489,7 @@ export function renderWorkspace(container) {
 
             <!-- 4. Deterministic Statutory Rule Outcomes -->
             ${
-              selectedItem.category !== "MUSIC" && ruleOutcomes.length > 0
+              !isDualRights && ruleOutcomes.length > 0
                 ? `
               <div class="inspector-section">
                 <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
@@ -422,7 +501,7 @@ export function renderWorkspace(container) {
                     .map(r => {
                       const isInsuf = r.outcome === "INSUFFICIENT_FACTS";
                       return `
-                    <div class="p-5 rounded-xl border border-gray-700/60 bg-gray-800/40 border-l-4 border-l-blue-500">
+                    <div id="rule-${r.rule_id}" class="p-5 rounded-xl border border-gray-700/60 bg-gray-800/40 border-l-4 border-l-blue-500 scroll-mt-6">
                       <div class="flex items-center justify-between mb-2">
                         <span class="text-sm font-bold text-white font-mono">${r.rule_id}</span>
                         <span class="px-2.5 py-1 rounded-lg text-xs font-mono font-bold uppercase ${
@@ -537,8 +616,27 @@ export function renderWorkspace(container) {
   const searchInput = container.querySelector("#wsSearchInput");
   if (searchInput) {
     searchInput.oninput = e => {
+      // Remember the caret: setState re-renders this whole pane, which replaces
+      // the input element. Without this the field lost focus after the first
+      // character and the reviewer could only ever type one letter.
+      pendingFocus = { id: "wsSearchInput", start: e.target.selectionStart, end: e.target.selectionEnd };
       store.setState({ searchQuery: e.target.value });
     };
+  }
+
+  if (pendingFocus) {
+    const el = container.querySelector(`#${pendingFocus.id}`);
+    if (el) {
+      el.focus();
+      if (typeof el.setSelectionRange === "function" && pendingFocus.start != null) {
+        try {
+          el.setSelectionRange(pendingFocus.start, pendingFocus.end);
+        } catch {
+          /* non-text input types do not support selection ranges */
+        }
+      }
+    }
+    pendingFocus = null;
   }
 
   container.querySelectorAll(".filter-tier").forEach(btn => {
@@ -570,6 +668,11 @@ export function renderWorkspace(container) {
     };
   }
 
+  const traceBtn = container.querySelector("#wsViewTrace");
+  if (traceBtn) traceBtn.onclick = () => store.setState({ view: "trace" });
+  const failDash = container.querySelector("#wsGoDashboardFail");
+  if (failDash) failDash.onclick = () => store.setState({ view: "dashboard" });
+
   const exportBtn = container.querySelector("#wsBtnExport");
   if (exportBtn) {
     exportBtn.onclick = () => {
@@ -577,17 +680,28 @@ export function renderWorkspace(container) {
     };
   }
 
+  // Citation chips jump to what they cite. Rule chips previously carried the
+  // same clickable styling but no handler and no target element, so clicking a
+  // [RULE_ID] chip silently did nothing.
+  function flashTarget(target) {
+    if (!target) return false;
+    target.scrollIntoView({ behavior: "smooth", block: "center" });
+    target.classList.add("ring-2", "ring-blue-500");
+    setTimeout(() => target.classList.remove("ring-2", "ring-blue-500"), 2000);
+    return true;
+  }
+
   container.querySelectorAll(".cite-token").forEach(chip => {
+    const evId = chip.dataset.evId;
+    const ruleId = chip.dataset.ruleId;
+    if (!evId && !ruleId) return;
+    chip.style.cursor = "pointer";
     chip.onclick = () => {
-      const evId = chip.dataset.evId;
-      if (evId) {
-        const card = container.querySelector(`#card-${evId}`);
-        if (card) {
-          card.scrollIntoView({ behavior: "smooth", block: "center" });
-          card.classList.add("ring-2", "ring-blue-500");
-          setTimeout(() => card.classList.remove("ring-2", "ring-blue-500"), 2000);
-        }
-      }
+      // getElementById tolerates ids that are not valid CSS selectors.
+      const target = evId
+        ? document.getElementById(`card-${evId}`)
+        : document.getElementById(`rule-${ruleId}`);
+      flashTarget(target);
     };
   });
 }

@@ -1,20 +1,19 @@
 {
   "schema_version": "1.0",
   "script": "data/scripts/the_last_good_year.pdf",
-  "script_revision": "v2 (adds INT. MERIDIAN SOUND - LOBBY - DAY for LOGO_PROP coverage)",
+  "script_revision": "v2 (INT. MERIDIAN SOUND - LOBBY - DAY added for LOGO_PROP coverage)",
   "pipeline_run": {
-    "report_id": "rpt_2640c7940863",
-    "note": "Entries 1-15 are scored against the last complete run, on script v1 (14 scenes / 6 pages). LOGO_PROP entries are ground truth only; the v2 run is blocked on the Gemini monthly spend cap."
+    "report_id": "rpt_57fdc861f486",
+    "note": "Scored against the script v2 run (15 scenes / 7 pages, 27 items, 222 evidence objects). All 19 entries now have a pipeline result; no entry is unscored."
   },
   "verification_method": "Each entry was verified by independent web research (web_search / web_fetch) performed fresh against primary and secondary sources. The stored Parallel evidence was NOT re-read when forming the independent finding, so a source the pipeline never retrieved can and does contradict it (see Gene Austin and Meridian Records).",
   "honesty_note": "This golden set was verified via independent AI-assisted web research, not a full manual paralegal review. Given the team size that was the achievable standard. Every source URL is listed so any entry can be re-checked by hand, and the two MISMATCH entries were found and recorded rather than smoothed over.",
   "generated": "2026-09-08",
   "counts": {
     "total": 19,
-    "MATCH": 12,
+    "MATCH": 16,
     "PARTIAL": 1,
-    "MISMATCH": 2,
-    "PENDING": 4
+    "MISMATCH": 2
   },
   "entries": [
     {
@@ -647,8 +646,23 @@
       "category": "LOGO_PROP",
       "expected_category": "LOGO_PROP",
       "pipeline": {
-        "tier": null,
-        "status": "NOT_YET_RUN"
+        "tier": "NEEDS_VERIFICATION",
+        "rationale": "The evidence confirms that \"Capitol Records\" is an actively registered trademark owned by Capitol Records, LLC [ev_bd4788c32882, ev_2bf04bad4387]. Because trademark rights do not expire on a fixed term, standard duration arithmetic does not apply to this property [TRADEMARK_NO_EXPIRY]. Since the active mark appears on screen in the scene, further review is required to evaluate whether the depiction implies endorsement or qualifies as nominative use [TRADEMARK_NO_EXPIRY].",
+        "rule_outcomes": [
+          {
+            "rule_id": "TRADEMARK_NO_EXPIRY",
+            "outcome": "NOT_APPLICABLE",
+            "pd_year": null,
+            "missing": []
+          }
+        ],
+        "rights_holder": "Capitol Records, LLC",
+        "evidence_count": 8,
+        "pages": [
+          2
+        ],
+        "on_screen": true,
+        "depiction": "NEUTRAL"
       },
       "verification": {
         "method": "web_search",
@@ -658,12 +672,16 @@
           "https://www.trademarkia.com/capitol-records-74801863"
         ]
       },
-      "verdict": "PENDING",
-      "note": "Ground truth established; pipeline has not yet run this scene (Gemini spend cap).",
+      "verdict": "MATCH",
+      "note": "Registrant matches independent verification (Capitol Records, LLC). Categorised LOGO_PROP, tiered NEEDS_VERIFICATION, 8 sourced evidence, all 3 claims cited.",
       "checks": {
         "registrant": "Capitol Records, LLC",
         "parent": "Universal Music Group",
-        "expected_tier": "NEEDS_VERIFICATION or ESCALATE"
+        "expected_tier": "NEEDS_VERIFICATION or ESCALATE",
+        "pipeline_registrant": "Capitol Records, LLC",
+        "registrant_matches": true,
+        "categorised_as_logo_prop": true,
+        "tier": "NEEDS_VERIFICATION"
       }
     },
     {
@@ -672,8 +690,23 @@
       "category": "LOGO_PROP",
       "expected_category": "LOGO_PROP",
       "pipeline": {
-        "tier": null,
-        "status": "NOT_YET_RUN"
+        "tier": "NEEDS_VERIFICATION",
+        "rationale": "The FedEx logo is an active, registered trademark owned by Federal Express Corporation [ev_faf1b24367c5, ev_70c298c19cdd]. Trademark rights do not expire on a fixed term, so duration arithmetic does not apply [TRADEMARK_NO_EXPIRY]. Because this active trademark will appear on screen in a neutral depiction, further review is needed to assess whether the use is nominative or implies endorsement [TRADEMARK_NO_EXPIRY].",
+        "rule_outcomes": [
+          {
+            "rule_id": "TRADEMARK_NO_EXPIRY",
+            "outcome": "NOT_APPLICABLE",
+            "pd_year": null,
+            "missing": []
+          }
+        ],
+        "rights_holder": "Federal Express Corporation",
+        "evidence_count": 8,
+        "pages": [
+          2
+        ],
+        "on_screen": true,
+        "depiction": "NEUTRAL"
       },
       "verification": {
         "method": "web_search",
@@ -683,11 +716,15 @@
           "https://www.trademarkia.com/fedex-87565158"
         ]
       },
-      "verdict": "PENDING",
-      "note": "Ground truth established; awaiting pipeline run.",
+      "verdict": "MATCH",
+      "note": "Registrant matches independent verification (Federal Express Corporation). Categorised LOGO_PROP, tiered NEEDS_VERIFICATION, 8 sourced evidence, all 3 claims cited.",
       "checks": {
         "registrant": "Federal Express Corporation",
-        "expected_tier": "NEEDS_VERIFICATION or ESCALATE"
+        "expected_tier": "NEEDS_VERIFICATION or ESCALATE",
+        "pipeline_registrant": "Federal Express Corporation",
+        "registrant_matches": true,
+        "categorised_as_logo_prop": true,
+        "tier": "NEEDS_VERIFICATION"
       }
     },
     {
@@ -696,8 +733,23 @@
       "category": "LOGO_PROP",
       "expected_category": "LOGO_PROP",
       "pipeline": {
-        "tier": null,
-        "status": "NOT_YET_RUN"
+        "tier": "NEEDS_VERIFICATION",
+        "rationale": "The Apple logo is an active, registered trademark owned by Apple Inc. [ev_1996131196a5], [ev_a62f92049f2b]. Because trademark rights do not expire on a fixed term, standard duration arithmetic does not apply to this property [TRADEMARK_NO_EXPIRY]. Furthermore, the brand's official guidelines explicitly state that their logo must not appear in third-party materials without express written permission [ev_a4221eddca8d]. Although the on-screen depiction is neutral, further review is required to determine if the usage implies endorsement or qualifies as nominative use [TRADEMARK_NO_EXPIRY].",
+        "rule_outcomes": [
+          {
+            "rule_id": "TRADEMARK_NO_EXPIRY",
+            "outcome": "NOT_APPLICABLE",
+            "pd_year": null,
+            "missing": []
+          }
+        ],
+        "rights_holder": "Apple Inc.",
+        "evidence_count": 8,
+        "pages": [
+          2
+        ],
+        "on_screen": true,
+        "depiction": "NEUTRAL"
       },
       "verification": {
         "method": "web_search",
@@ -706,12 +758,16 @@
           "https://www.apple.com/legal/intellectual-property/guidelinesfor3rdparties.html"
         ]
       },
-      "verdict": "PENDING",
-      "note": "Ground truth established; awaiting pipeline run. Strong test of prominent vs incidental on-screen logo use.",
+      "verdict": "MATCH",
+      "note": "Registrant matches independent verification (Apple Inc.). Categorised LOGO_PROP, tiered NEEDS_VERIFICATION, 8 sourced evidence, all 4 claims cited.",
       "checks": {
         "registrant": "Apple Inc.",
         "has_published_usage_policy": true,
-        "expected_tier": "NEEDS_VERIFICATION or ESCALATE"
+        "expected_tier": "NEEDS_VERIFICATION or ESCALATE",
+        "pipeline_registrant": "Apple Inc.",
+        "registrant_matches": true,
+        "categorised_as_logo_prop": true,
+        "tier": "NEEDS_VERIFICATION"
       }
     },
     {
@@ -720,8 +776,23 @@
       "category": "LOGO_PROP",
       "expected_category": "LOGO_PROP",
       "pipeline": {
-        "tier": null,
-        "status": "NOT_YET_RUN"
+        "tier": "NEEDS_VERIFICATION",
+        "rationale": "The Starbucks name and siren logo are actively registered trademarks owned by Starbucks Corporation [ev_c1cf19354a33, ev_0c4dc6d4efae, ev_2ea8f23ef084]. Because trademark rights do not expire on a fixed term, the rule outcome indicates that duration arithmetic does not apply to these registered marks [TRADEMARK_NO_EXPIRY]. Furthermore, the corporate terms of use explicitly state that Starbucks marks may not be copied or used without prior written permission [ev_73d3b4110f77]. Since this active trademark appears on screen, the item requires escalation to evaluate whether the neutral depiction implies endorsement or qualifies as nominative use [TRADEMARK_NO_EXPIRY].",
+        "rule_outcomes": [
+          {
+            "rule_id": "TRADEMARK_NO_EXPIRY",
+            "outcome": "NOT_APPLICABLE",
+            "pd_year": null,
+            "missing": []
+          }
+        ],
+        "rights_holder": "Starbucks Corporation",
+        "evidence_count": 8,
+        "pages": [
+          2
+        ],
+        "on_screen": true,
+        "depiction": "NEUTRAL"
       },
       "verification": {
         "method": "web_search",
@@ -731,12 +802,16 @@
           "https://news.bloomberglaw.com/ip-law/starbucks-coffee-retailer-settle-siren-logo-trademark-lawsuit"
         ]
       },
-      "verdict": "PENDING",
-      "note": "Ground truth established; awaiting pipeline run. Active enforcement history makes this a good escalation test.",
+      "verdict": "MATCH",
+      "note": "Registrant matches independent verification (Starbucks Corporation). Categorised LOGO_PROP, tiered NEEDS_VERIFICATION, 8 sourced evidence, all 4 claims cited.",
       "checks": {
         "registrant": "Starbucks Corporation",
         "enforcement_history": true,
-        "expected_tier": "NEEDS_VERIFICATION or ESCALATE"
+        "expected_tier": "NEEDS_VERIFICATION or ESCALATE",
+        "pipeline_registrant": "Starbucks Corporation",
+        "registrant_matches": true,
+        "categorised_as_logo_prop": true,
+        "tier": "NEEDS_VERIFICATION"
       }
     }
   ]
