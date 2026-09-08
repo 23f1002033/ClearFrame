@@ -1,60 +1,65 @@
-/* ClearFrame Studio Theme & Custom Styles */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+/* ClearFrame Studio — Visual Refresh */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 :root {
-  --bg-base: #0c0e12;
-  --bg-surface: #14171f;
-  --bg-card: #1b202c;
-  --bg-card-hover: #222938;
-  --border-subtle: #252b3b;
+  /* Warmer dark palette — not pure black */
+  --bg-base: #111827;
+  --bg-surface: #1e293b;
+  --bg-card: #1e293b;
+  --bg-card-hover: #334155;
+  --border-subtle: #334155;
   --border-active: #3b82f6;
-  
+
   --text-main: #f1f5f9;
   --text-muted: #94a3b8;
   --text-subtle: #64748b;
 
-  --esc: #ef4444;
-  --esc-bg: rgba(239, 68, 68, 0.12);
-  --esc-border: rgba(239, 68, 68, 0.35);
+  /* 3 semantic colors only — red, amber, green */
+  --esc: #f87171;
+  --esc-bg: rgba(248, 113, 113, 0.10);
+  --esc-border: rgba(248, 113, 113, 0.25);
 
-  --ver: #f59e0b;
-  --ver-bg: rgba(245, 158, 11, 0.12);
-  --ver-border: rgba(245, 158, 11, 0.35);
+  --ver: #fbbf24;
+  --ver-bg: rgba(251, 191, 36, 0.10);
+  --ver-border: rgba(251, 191, 36, 0.25);
 
-  --clr: #10b981;
-  --clr-bg: rgba(16, 185, 129, 0.12);
-  --clr-border: rgba(16, 185, 129, 0.35);
+  --clr: #34d399;
+  --clr-bg: rgba(52, 211, 153, 0.10);
+  --clr-border: rgba(52, 211, 153, 0.25);
 }
 
+/* ─── Base ──────────────────────────────────────────────── */
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   background-color: var(--bg-base);
   color: var(--text-main);
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
+  font-size: 14px;
+  line-height: 1.6;
 }
 
 code, pre, .font-mono {
   font-family: 'JetBrains Mono', ui-monospace, monospace;
 }
 
-/* Custom subtle scrollbars */
+/* ─── Scrollbars (softer) ───────────────────────────────── */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #272f42;
+  background: #475569;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #3b4661;
+  background: #64748b;
 }
 
-/* Badge variants */
+/* ─── Badge variants (3 colors, softer) ─────────────────── */
 .badge-ESCALATE {
   background: var(--esc-bg);
   color: var(--esc);
@@ -73,63 +78,71 @@ code, pre, .font-mono {
   border: 1px solid var(--clr-border);
 }
 
-/* Decision pill states */
+/* ─── Decision pill states ──────────────────────────────── */
 .decision-PENDING {
   color: var(--text-subtle);
   border-color: var(--border-subtle);
 }
 .decision-CONFIRMED {
-  color: #10b981;
-  background: rgba(16, 185, 129, 0.12);
-  border-color: rgba(16, 185, 129, 0.35);
+  color: var(--clr);
+  background: var(--clr-bg);
+  border-color: var(--clr-border);
 }
 .decision-REJECTED {
   color: #94a3b8;
-  background: rgba(148, 163, 184, 0.1);
-  border-color: rgba(148, 163, 184, 0.3);
+  background: rgba(148, 163, 184, 0.08);
+  border-color: rgba(148, 163, 184, 0.2);
 }
 .decision-ESCALATED {
-  color: #ef4444;
-  background: rgba(239, 68, 68, 0.12);
-  border-color: rgba(239, 68, 68, 0.35);
+  color: var(--esc);
+  background: var(--esc-bg);
+  border-color: var(--esc-border);
 }
 
-/* Interactive Citation Chips */
+/* ─── Interactive Citation Chips ────────────────────────── */
 .cite-token {
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  background: rgba(59, 130, 246, 0.15);
+  background: rgba(59, 130, 246, 0.12);
   color: #93c5fd;
-  border: 1px solid rgba(59, 130, 246, 0.35);
-  padding: 1px 6px;
-  border-radius: 4px;
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  padding: 2px 8px;
+  border-radius: 6px;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.15s ease-in-out;
   text-decoration: none;
 }
 .cite-token:hover {
-  background: rgba(59, 130, 246, 0.3);
+  background: rgba(59, 130, 246, 0.25);
   color: #ffffff;
   border-color: #60a5fa;
   transform: translateY(-1px);
 }
 
 .cite-rule {
-  background: rgba(168, 85, 247, 0.15);
+  background: rgba(168, 85, 247, 0.12);
   color: #d8b4fe;
-  border-color: rgba(168, 85, 247, 0.35);
+  border-color: rgba(168, 85, 247, 0.25);
 }
 .cite-rule:hover {
-  background: rgba(168, 85, 247, 0.3);
+  background: rgba(168, 85, 247, 0.25);
   color: #ffffff;
   border-color: #c084fc;
 }
 
-/* Animations */
+/* ─── Animations ────────────────────────────────────────── */
+@keyframes fade-in {
+  from { opacity: 0; transform: scale(0.98); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out;
+}
+
 @keyframes pulse-subtle {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
@@ -140,23 +153,28 @@ code, pre, .font-mono {
 
 @keyframes slideInRight {
   from { transform: translateX(100%); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
+  to   { transform: translateX(0); opacity: 1; }
 }
 .animate-slide-in {
   animation: slideInRight 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Hotkey chip */
+/* ─── Hotkey chip ───────────────────────────────────────── */
 .kbd-chip {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 1px 5px;
-  font-size: 10px;
+  padding: 2px 7px;
+  font-size: 11px;
   font-family: 'JetBrains Mono', monospace;
-  background: #1e2433;
+  background: #1e293b;
   color: #94a3b8;
-  border: 1px solid #333d54;
-  border-radius: 4px;
-  box-shadow: 0 1px 0 rgba(0,0,0,0.4);
+  border: 1px solid #475569;
+  border-radius: 5px;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.3);
+}
+
+/* ─── Section spacing helper ────────────────────────────── */
+.inspector-section + .inspector-section {
+  margin-top: 2rem;
 }

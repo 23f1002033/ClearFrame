@@ -7,7 +7,7 @@ import { store } from "../store.js";
 const TOUR_STEPS = [
   {
     title: "1. Multi-Agent Screenplay Triage",
-    desc: "ClearFrame reads raw .pdf/.txt screenplays and orchestrates Google ADK agents to parse real page numbers, extract brands, music, real entities, and run sourced deep research via Parallel Web.",
+    desc: "ClearFrame reads raw .pdf/.txt screenplays and orchestrates multiple AI agents to parse real page numbers, extract brands, music, real entities, and run sourced deep research across the web.",
     action: () => store.setState({ view: "workspace" })
   },
   {
@@ -21,7 +21,7 @@ const TOUR_STEPS = [
   },
   {
     title: "3. Sourced Citations & Validation Guardrails",
-    desc: "Every claim carries verifiable inline citations [ev_...] linked to retrieved registry records. Uncited statements and subjective legal conclusions are automatically stripped during backend validation.",
+    desc: "Every claim carries verifiable inline citations [ev_...] linked to retrieved registry records. Uncited statements and subjective legal conclusions are automatically stripped during validation.",
     action: () => {
       store.setState({ view: "workspace" });
       const cokeItem = store.state.currentReport?.items.find(i => i.mention_text === "COCA-COLA");
@@ -29,10 +29,10 @@ const TOUR_STEPS = [
     }
   },
   {
-    title: "4. The 409 Review Gate (Strict Human-in-the-Loop)",
-    desc: "The backend strictly refuses to export while any item remains unreviewed (HTTP 409 Conflict). A clearance log cannot leave the building without an attorney confirming, rejecting, or escalating every item.",
+    title: "4. The Review Gate (Strict Human-in-the-Loop)",
+    desc: "The system strictly refuses to export while any item remains unreviewed. A clearance log cannot leave the building without an attorney confirming, rejecting, or escalating every item.",
     action: () => {
-      store.export(); // triggers the 409 gate modal!
+      store.export();
     }
   },
   {
@@ -48,7 +48,6 @@ export function initDemoTour() {
   let currentStepIndex = 0;
 
   window.addEventListener("start-demo-tour", () => {
-    // If no report is loaded, load demo report first
     if (!store.state.currentReport) {
       store.loadDemoReport();
     }
@@ -69,30 +68,30 @@ export function initDemoTour() {
     if (step.action) step.action();
 
     overlay.innerHTML = `
-      <div class="bg-slate-900 border border-indigo-500/50 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative animate-fade-in">
-        <div class="flex items-center justify-between mb-3">
-          <span class="text-[11px] font-mono font-bold uppercase tracking-wider text-indigo-400">
+      <div class="bg-gray-800 border border-blue-500/30 rounded-2xl max-w-lg w-full p-8 shadow-2xl relative animate-fade-in">
+        <div class="flex items-center justify-between mb-4">
+          <span class="text-xs font-mono font-bold uppercase tracking-wider text-blue-400">
             Guided Tour · Step ${currentStepIndex + 1} of ${TOUR_STEPS.length}
           </span>
-          <button id="closeTourBtn" class="text-slate-400 hover:text-white transition-colors">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+          <button id="closeTourBtn" class="text-gray-400 hover:text-white transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
           </button>
         </div>
 
-        <h3 class="text-lg font-bold text-white tracking-tight mb-2">${step.title}</h3>
-        <p class="text-xs text-slate-300 leading-relaxed mb-6">${step.desc}</p>
+        <h3 class="text-xl font-bold text-white tracking-tight mb-3">${step.title}</h3>
+        <p class="text-sm text-gray-300 leading-relaxed mb-8">${step.desc}</p>
 
-        <div class="flex items-center justify-between pt-2 border-t border-slate-800">
+        <div class="flex items-center justify-between pt-4 border-t border-gray-700/60">
           <button id="prevTourBtn" ${currentStepIndex === 0 ? "disabled" : ""} 
-            class="px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800 text-slate-300 text-xs font-semibold disabled:opacity-30 transition-all">
+            class="px-4 py-2 rounded-xl border border-gray-600 bg-gray-700 text-gray-300 text-sm font-semibold disabled:opacity-30 transition-all">
             Previous
           </button>
 
-          <div class="flex items-center gap-1.5">
-            ${TOUR_STEPS.map((_, i) => `<span class="w-2 h-2 rounded-full ${i === currentStepIndex ? "bg-indigo-500" : "bg-slate-800"}"></span>`).join("")}
+          <div class="flex items-center gap-2">
+            ${TOUR_STEPS.map((_, i) => `<span class="w-2.5 h-2.5 rounded-full ${i === currentStepIndex ? "bg-blue-500" : "bg-gray-700"}"></span>`).join("")}
           </div>
 
-          <button id="nextTourBtn" class="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md shadow-indigo-600/30 transition-all">
+          <button id="nextTourBtn" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold shadow-md shadow-blue-600/25 transition-all">
             ${currentStepIndex === TOUR_STEPS.length - 1 ? "Finish Tour" : "Next Step"}
           </button>
         </div>
