@@ -12,8 +12,7 @@ produces a review-ready clearance log where every claim carries a citation.
 
 Built for the Google Cloud *Agentic Cinema* hackathon (Parallel partner track).
 
-Demo Video :- https://youtu.be/rFu6IBvZGfQ
-
+**[Demo Video →](https://youtu.be/rFu6IBvZGfQ)**
 ---
 
 ## The problem
